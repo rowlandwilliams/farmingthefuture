@@ -1,12 +1,23 @@
 d3.csv('./bft_data.csv').then(function(data) {
-    
+   
+    var groups = [... new Set(data.map(x => x.Grouping2))].map((y,i) => ({
+        'group': y,
+        'groupid': 'group' + i 
+     }))
+
+
+    //var size = ['large', 'small']
     var nodes = data.map((x, i) => ({
-        'group': x.Grouping,
-        'name': x.Name,
-        'id': i, 
-        'loc': x.Location,
+        'group': groups.filter(y => y.group == x.Grouping2)[0].groupid,
+        'name': x.Name2,
+        'id':  i, 
+        'xid': 'x' + i,
+        'loc': x.Location2,
         'size': x.Scale
     }))
+    
+
+    
     
     
     function getLinks(category) {
@@ -31,11 +42,11 @@ d3.csv('./bft_data.csv').then(function(data) {
             for (var j=0; j< matrix[i].length; j++) {
                 var temp = {};
                 if (matrix[i][j] == 1 && i != j) {
-                    temp['source'] = i;
-                    temp['target'] = j;
-                    temp['link_id'] = i > j ? (String(j) + String(i)) : (String(i) + String(j))
-                    temp['category'] = category,
-                    temp['name'] = 
+                    temp['source'] = 'x' + i;
+                    temp['target'] = 'x' + j;
+                    // temp['targetname'] = nodes.filter(x => x.id == j)[0].name
+                    temp['link_id'] = i > j ? (String(j) + String(i)) : (String(i) + String(j));
+                    temp['category'] = category;
                     links.push(temp); 
                 }      
             }
@@ -50,66 +61,103 @@ d3.csv('./bft_data.csv').then(function(data) {
     var groupLinks = getLinks('group')
     var sizeLinks = getLinks('size')
 
-    var links = groupLinks.concat(locationLinks)
-
-    console.log(links)
-    console.log(locationLinks)
-    console.log(groupLinks)
+    var links = sizeLinks.concat(locationLinks)
     
-    var data = {'nodes': nodes, 'links': locationLinks}
-    var sizes = [ ...new Set(nodes.map(x => x.size)) ]
-    console.log(sizes)
+    
+    console.log(nodes)
+    // nested array
+    var nest = {'name': 'ftf', 'children': []};
+    // unique groups
+    var groupids = groups.map(x => x.groupid)
+    
+    nest.children = groupids.map(x => ({
+        'name': x, 
+        'children': nodes.filter(y => y.group == x).map(z => ({
+            // 'name': z.name,
+            'name': z.xid,
+            'location': z.loc,
+            'imports': locationLinks.filter(x => x.source == z.xid).map(y => y.target)
+                .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
+        }))
+    }))
 
-    var sizes = {'very small': 1, 'small': 2, 'medium': 4, 'medium/large': 7, 'large': 10}
+    var color = [... new Set(nodes.map(x => x.loc))].map(y => ({'loc': y, 'col': '#' + Math.floor(Math.random()*16777215).toString(16)}))
 
-    // define height
+
+
     var width = window.innerWidth;
     var height = window.innerHeight;
-    var radius = 6;
+    var radius = width / 2;
+    tree = d3.cluster()
+        .size([2 * Math.PI, radius - 100])
 
-    const simulation = d3.forceSimulation(data.nodes)
-      .force("link", d3.forceLink(data.links).id(d => d.id))
-      .force("charge", d3.forceManyBody().distanceMax(100).distanceMin(50))
-      .force("center", d3.forceCenter(width / 2, height / 2));
+
+    line = d3.lineRadial()
+        .curve(d3.curveBundle.beta(0.85))
+        .radius(d => d.y)
+        .angle(d => d.x)
+    
+
+    colornone = "#ccc"
+    colorout = "#f00"
+    colorin = "#00f"
+
+
+    function id(node) {
+        return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
+      }
+
+    function bilink(root) {
+        const map = new Map(root.leaves().map(d => [id(d), d]));
+        for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
+        for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
+        return root;
+      }
+
+
+
+    data = nest;
+
+    const root = tree(bilink(d3.hierarchy(data)
+      .sort((a, b) => d3.ascending(a.height, b.height) || d3.ascending(a.data.name, b.data.name))));
+
+    console.log(color)
 
     const svg = d3.select('body').append("svg")
-      .attr("viewBox", [0, 0, width, height]);
-
-    const link = svg.append("g")
-        .attr("stroke", "#999")
-        .attr("stroke-opacity", 0.6)
-        .selectAll("line")
-        .data(data.links)
-        .join("line")
-        .attr("stroke-width", d => Math.sqrt(d.value));
+      .attr("viewBox", [-width  , -height, width * 2, height * 2]);
 
     const node = svg.append("g")
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
-        .selectAll("circle")
-        .data(data.nodes)
-        .join("circle")
-            .attr('class', d => d.name)
-        .attr("r", d => sizes[d.size])
-        .attr("fill", 'black')
-        //   .call(drag(simulation));
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 20)
+        .attr('stroke', '#202020')
+        .selectAll("g")
+        .data(root.leaves())
+        .join("g")
+        .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+        .append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.x < Math.PI ? 6 : -6)
+        .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+        .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+        .text(function(d){ console.log(d); return nodes.filter(x => x.xid == d.data.name)[0].name})
+        .each(function(d) { d.text = this; })
+//       .on("mouseover", overed)
+//       .on("mouseout", outed)
+//       .call(text => text.append("title").text(d => `${id(d)}
+// ${d.outgoing.length} outgoing
+// ${d.incoming.length} incoming`));
+    
 
-    node.append("title")
-        .text(d => d.id);
+    const link = svg.append("g")
+        .attr("stroke", colornone)
+        .attr("fill", "none")
+        .selectAll("path")
+        .data(root.leaves().flatMap(leaf => leaf.outgoing))
+        .join("path")
+        .style("mix-blend-mode", "multiply")
+        .style('stroke', function(d) { return color.filter(x => x.loc == d[0].data.location)[0].col})//color.filter(x => x.loc == d.data.location)[0].col})
+        .attr("d", ([i, o]) => line(i.path(o)))
+        .each(function(d) { d.path = this; });
+    // var sizes = {'very small': 3, 'small': 4, 'medium': 5, 'medium/large': 5, 'large': 6}
 
-    simulation.on("tick", () => {
-        link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
-    node.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
-        .attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
-  });
-
-  invalidation.then(() => simulation.stop()); // work on this
-
-  return svg.node();
-   
-})
+    })
