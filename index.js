@@ -77,6 +77,7 @@ d3.csv('./bft_data.csv').then(function(data) {
         'children': nodes.filter(y => y.group == x).map(z => ({
             'name': z.xid,
             'location': z.loc,
+            'group': z.group,
             // 'link-ids': locationLinks.filter(x => x.source == z.xid).map(x => x.link_id2),
             'imports': locationLinks.filter(x => x.source == z.xid).map(y => y.target)
                 .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
@@ -86,19 +87,27 @@ d3.csv('./bft_data.csv').then(function(data) {
     
     // set random colours
     var color = [... new Set(nodes.map(x => x.loc))].map(y => ({'loc': y, 'col': '#' + Math.floor(Math.random()*16777215).toString(16)}))
-    console.log(color)
-    //       {loc: "London", col: "#fefcdc"}
-// 1: {loc: "Wales", col: "#f3f6f7"}
-// 2: {loc: "South-west", col: "#45eaf0"}
-// 3: {loc: "Midlands", col: "#8ed253"}
-// 4: {loc: "East", col: "#a80348"}
-// 5: {loc: "South-east", col: "#a52a94"}
-// 6: {loc: "North", col: "#d21044"}
+    var colG = ["#fefcdc", "#f3f6f7", "#45eaf0", "#8ed253", "#a80348", "#a52a94", "#d21044"]
+    var colorGroup = [... new Set(nodes.map(x => x.group))].map((y,i) => ({'group': y, 'col': colG[i]}));
+    
+    console.log(colG[1])
+    var test = d3.scaleOrdinal(d3.schemeSet1)
+    console.log(test)
 
+
+// {loc: "London", col: "#f14ad4"}
+// 1: {loc: "Wales", col: "#14d8fd"}
+// 2: {loc: "South-west", col: "#6943ee"}
+// 3: {loc: "Midlands", col: "#589bcb"}
+// 4: {loc: "East", col: "#ab503c"}
+// 5: {loc: "South-east", col: "#2f0c5"}
+// 6: {loc: "North", col: "#e2aa7d"}
     // dimensions
     var width = window.innerWidth;
     var height = window.innerHeight;
-    var radius = width * 0.45;
+    var radius = width * 0.5;
+
+    colornone = "#ccc"
     tree = d3.cluster()
         .size([2 * Math.PI, radius - 100])
 
@@ -137,7 +146,7 @@ d3.csv('./bft_data.csv').then(function(data) {
       .attr("viewBox", [-width  , -height, width * 2, height * 10]);
 
     // add nodes
-      const node = svg.append("g")
+    const node = svg.append("g")
         .attr("font-family", "sans-serif")
         .attr("font-size", 20)
         .attr('fill', '#202020')
@@ -145,6 +154,20 @@ d3.csv('./bft_data.csv').then(function(data) {
         .data(root.leaves())
         .join("g")
         .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+        .on("mouseover", overed)
+        .on("mouseout", outed)
+       
+    node
+        .append('circle')
+        .attr('r', 7)
+        .attr('id', function(d) { return d.data.name})
+        .attr('class', function(d) {return d.data.location})
+        .style('fill', function(d) { return test(d.data.group)})
+        .each(function(d) { d.circle = this; })
+        
+        
+        
+    node  
         .append("text")
         .attr("dy", "0.31em")
         .attr("x", d => d.x < Math.PI ? 6 : -6)
@@ -154,37 +177,50 @@ d3.csv('./bft_data.csv').then(function(data) {
         .attr('id', function(d) { return d.data.name})
         .text(function(d){ return nodes.filter(x => x.xid == d.data.name)[0].name})
         .each(function(d) { d.text = this; })
-        .on("mouseover", overed)
-        .on("mouseout", outed)
+        
 
-    
+    // node.append('circle')
+    //   .attr('r', 40)
+    //   .style('fille', 'red')
 
     const link = svg.append("g")
-        .attr("fill", "none")
+        .attr("stroke", colornone)
+        .attr('fill', 'none')
         .selectAll("path")
         .data(root.leaves().flatMap(leaf => leaf.outgoing))
         .join("path")
         .style("mix-blend-mode", "multiply")
-        .style('stroke', function(d) { return color.filter(x => x.loc == d[0].data.location)[0].col})//color.filter(x => x.loc == d.data.location)[0].col})
+        //.style('stroke', 'grey')//function(d) { return color.filter(x => x.loc == d[0].data.location)[0].col})//color.filter(x => x.loc == d.data.location)[0].col})
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', function(d) { return d[0].data.location})
         .attr('id', function(d) { return d[0].data.name})
         .each(function(d) { d.path = this; });
     // var sizes = {'very small': 3, 'small': 4, 'medium': 5, 'medium/large': 5, 'large': 6}
 
-    function overed(d) {
-        var loc = d.data.location; // define location and id
-        var id = d.data.name
-        
-        d3.select(this).attr('font-weight', 'bold') // current label to bold
-        
-        d3.selectAll("path."+ loc).style('opacity', 0.25) // current selection links fade except from node in question
-        d3.selectAll('path' + '#' + id).raise().style('opacity', 1)
-        d3.selectAll("text."+ loc).style('fill', color.filter(x => x.loc == loc)[0].col) // make selected text path color
-        
-        d3.selectAll("path:not(." + loc + ")").style("opacity", 0.01) // fade all non-relevant text and links
-        d3.selectAll("text:not(." + loc + ")").style("opacity", 0.02)
+      var circles = []
+      for (var i =0; i<nodes.length; i++) {
+          circles[i] = 'circle#' + nodes[i].xid
+      }
 
+      
+    function overed(d) {
+        link.style("mix-blend-mode", null);
+        d3.select(this).attr("font-weight", "bold");
+        // d3.selectAll('circle').style('opacity', 0)
+
+        d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", 'red').raise();
+        d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", 'red').attr("font-weight", "bold");
+        d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", 'red').raise();
+        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", 'red').attr("font-weight", "bold");
+        
+        var current = d.outgoing.map(([, d]) => d.circle).concat(d.incoming.map(([, d]) => d.circle))
+                        .concat(d.outgoing.map(([, d]) => d.text)).concat(d.incoming.map(([, d]) => d.text))
+        var circles = d3.selectAll('circle, text').nodes()
+        var filt = circles.filter(x => !current.includes(x))
+        d3.selectAll(filt).style('opacity', 0.2)
+
+
+        
         
         
       }
@@ -192,19 +228,17 @@ d3.csv('./bft_data.csv').then(function(data) {
 
 
       function outed(d) {
-        var loc = d.data.location;
-        var id = d.data.name
+        link.style("mix-blend-mode", "multiply");
+        d3.select(this).attr("font-weight", null);
 
-        d3.select(this).attr('font-weight', 'null') // selected node return to null 
-        
-        d3.selectAll("path."+ loc).style('stroke', color.filter(x => x.loc == loc)[0].col).style('opacity', 1)
-        d3.selectAll("text."+ loc).style('fill', '#202020') // return selected paths and text to normal
-        
-        d3.selectAll("path:not(." + loc + ")").style("opacity", 1); // return faded paths / text
-        d3.selectAll("text:not(." + loc + ")").style("opacity", 1);
-        
+        d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", null);
+        d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", null).attr("font-weight", null);
+        d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", null);
+        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", null).attr("font-weight", null);
 
-       
+        var circles = d3.selectAll('circle, text').nodes()
+        d3.selectAll(circles).style('opacity', 1)
+
   
       }
 
