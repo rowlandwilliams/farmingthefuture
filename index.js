@@ -53,7 +53,7 @@ d3.csv('./bft_data.csv').then(function(data) {
             }
         }
     
-        //var links = Object.values(links.reduce((acc,cur)=>Object.assign(acc,{[cur.link_id]:cur}),{}))
+        // var links = Object.values(links.reduce((acc,cur)=>Object.assign(acc,{[cur.link_id]:cur}),{}))
         return links
     }
 
@@ -75,10 +75,9 @@ d3.csv('./bft_data.csv').then(function(data) {
     nest.children = groupids.map(x => ({
         'name': x, 
         'children': nodes.filter(y => y.group == x).map(z => ({
-            // 'name': z.name,
             'name': z.xid,
             'location': z.loc,
-            'link-ids': locationLinks.filter(x => x.source == z.xid).map(x => x.link_id2),
+            // 'link-ids': locationLinks.filter(x => x.source == z.xid).map(x => x.link_id2),
             'imports': locationLinks.filter(x => x.source == z.xid).map(y => y.target)
                 .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
         }))
@@ -87,7 +86,14 @@ d3.csv('./bft_data.csv').then(function(data) {
     
     // set random colours
     var color = [... new Set(nodes.map(x => x.loc))].map(y => ({'loc': y, 'col': '#' + Math.floor(Math.random()*16777215).toString(16)}))
-
+    console.log(color)
+    //       {loc: "London", col: "#fefcdc"}
+// 1: {loc: "Wales", col: "#f3f6f7"}
+// 2: {loc: "South-west", col: "#45eaf0"}
+// 3: {loc: "Midlands", col: "#8ed253"}
+// 4: {loc: "East", col: "#a80348"}
+// 5: {loc: "South-east", col: "#a52a94"}
+// 6: {loc: "North", col: "#d21044"}
 
     // dimensions
     var width = window.innerWidth;
@@ -104,10 +110,6 @@ d3.csv('./bft_data.csv').then(function(data) {
         .angle(d => d.x)
     
 
-    colornone = "#ccc"
-    colorout = "#f00"
-    colorin = "#00f"
-
     // function to identify id of linked components
     function id(node) {
         return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
@@ -118,7 +120,6 @@ d3.csv('./bft_data.csv').then(function(data) {
         const map = new Map(root.leaves().map(d => [id(d), d]));
         
         for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
-        for (const d of root.leaves()) d.link_ids = d.data.links_ids;
         for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
         return root;
       }
@@ -144,14 +145,13 @@ d3.csv('./bft_data.csv').then(function(data) {
         .data(root.leaves())
         .join("g")
         .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-        // .append('circle')
-        // .attr('r', 2)
         .append("text")
         .attr("dy", "0.31em")
         .attr("x", d => d.x < Math.PI ? 6 : -6)
         .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
         .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
         .attr('class', function(d) {return d.data.location})
+        .attr('id', function(d) { return d.data.name})
         .text(function(d){ return nodes.filter(x => x.xid == d.data.name)[0].name})
         .each(function(d) { d.text = this; })
         .on("mouseover", overed)
@@ -160,7 +160,6 @@ d3.csv('./bft_data.csv').then(function(data) {
     
 
     const link = svg.append("g")
-        .attr("stroke", colornone)
         .attr("fill", "none")
         .selectAll("path")
         .data(root.leaves().flatMap(leaf => leaf.outgoing))
@@ -169,50 +168,43 @@ d3.csv('./bft_data.csv').then(function(data) {
         .style('stroke', function(d) { return color.filter(x => x.loc == d[0].data.location)[0].col})//color.filter(x => x.loc == d.data.location)[0].col})
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', function(d) { return d[0].data.location})
+        .attr('id', function(d) { return d[0].data.name})
         .each(function(d) { d.path = this; });
     // var sizes = {'very small': 3, 'small': 4, 'medium': 5, 'medium/large': 5, 'large': 6}
 
     function overed(d) {
-        // console.log(d)
+        var loc = d.data.location; // define location and id
+        var id = d.data.name
         
-        // link.style("mix-blend-mode", null);
-        d3.select(this).attr('font-weight', 'bold')
-            .transition().duration(500).delay(500)
-
-
+        d3.select(this).attr('font-weight', 'bold') // current label to bold
         
-        var loc = d.data.location;
-
-        d3.selectAll("path."+ loc).raise()
-        d3.selectAll("path:not(." + loc + ")").style("opacity", 0.1);
+        d3.selectAll("path."+ loc).style('opacity', 0.25) // current selection links fade except from node in question
+        d3.selectAll('path' + '#' + id).raise().style('opacity', 1)
+        d3.selectAll("text."+ loc).style('fill', color.filter(x => x.loc == loc)[0].col) // make selected text path color
         
-        d3.selectAll("text."+ loc).style('fill', color.filter(x => x.loc == loc)[0].col)
-        d3.selectAll("text:not(." + loc + ")").style("opacity", 0.1);
+        d3.selectAll("path:not(." + loc + ")").style("opacity", 0.01) // fade all non-relevant text and links
+        d3.selectAll("text:not(." + loc + ")").style("opacity", 0.02)
 
         
-        //d3.selectAll('path.London').style('stroke', 'black')    
-        // d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", colorin).raise();
-        // d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", colorin).attr("font-weight", "bold");
-        // d3.selectAll('path').attr("stroke", 'grey');
-
-        // d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", colorin).raise();
-        // d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", colorin).attr("font-weight", "bold");
+        
       }
-    
+      
+
 
       function outed(d) {
-        // console.log(d)
-        d3.select(this).attr('font-weight', 'null')
         var loc = d.data.location;
-        d3.selectAll("path:not(." + loc + ")").style("opacity", 1);
-        d3.selectAll("text:not(." + loc + ")").style("opacity", 1);
-        d3.selectAll("text."+ loc).style('fill', '#202020')
+        var id = d.data.name
 
-        // link.style("mix-blend-mode", 'multiply');
-        // d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", null);
-        // d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", null).attr("font-weight", null);
-        // d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", null);
-        // d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", null).attr("font-weight", null);
+        d3.select(this).attr('font-weight', 'null') // selected node return to null 
+        
+        d3.selectAll("path."+ loc).style('stroke', color.filter(x => x.loc == loc)[0].col).style('opacity', 1)
+        d3.selectAll("text."+ loc).style('fill', '#202020') // return selected paths and text to normal
+        
+        d3.selectAll("path:not(." + loc + ")").style("opacity", 1); // return faded paths / text
+        d3.selectAll("text:not(." + loc + ")").style("opacity", 1);
+        
+
+       
   
       }
 
