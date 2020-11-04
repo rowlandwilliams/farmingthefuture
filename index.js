@@ -46,7 +46,8 @@ d3.csv('./bft_data.csv').then(function(data) {
                     temp['target'] = 'x' + j;
                     // temp['targetname'] = nodes.filter(x => x.id == j)[0].name
                     temp['link_id'] = i > j ? (String(j) + String(i)) : (String(i) + String(j));
-                    temp['link_id2'] = i + '-' + j;
+                    temp['link_id2'] = 'x' + i + 'x' + j;
+                    temp['link'] = 'link_id' + category;
                     temp['category'] = category;
                     links.push(temp); 
                 }      
@@ -64,8 +65,7 @@ d3.csv('./bft_data.csv').then(function(data) {
 
   
     var links = sizeLinks.concat(locationLinks)
-    
-    
+    console.log(links.filter(x => x.link_id2 == 'x0x1'))
     
     // nested array
     var nest = {'name': 'ftf', 'children': []};
@@ -76,10 +76,9 @@ d3.csv('./bft_data.csv').then(function(data) {
         'name': x, 
         'children': nodes.filter(y => y.group == x).map(z => ({
             'name': z.xid,
-            'location': z.loc,
             'group': z.group,
-            // 'link-ids': locationLinks.filter(x => x.source == z.xid).map(x => x.link_id2),
-            'imports': locationLinks.filter(x => x.source == z.xid).map(y => y.target)
+            'category': links.filter(x => x.source == z.xid).map(x => x.category),
+            'imports': links.filter(x => x.source == z.xid).map(y => y.target)
                 .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
         }))
     }))
@@ -90,9 +89,9 @@ d3.csv('./bft_data.csv').then(function(data) {
     var colG = ["#fefcdc", "#f3f6f7", "#45eaf0", "#8ed253", "#a80348", "#a52a94", "#d21044"]
     var colorGroup = [... new Set(nodes.map(x => x.group))].map((y,i) => ({'group': y, 'col': colG[i]}));
     
-    console.log(colG[1])
+    //console.log(colG[1])
     var test = d3.scaleOrdinal(d3.schemeSet1)
-    console.log(test)
+    
 
 
 // {loc: "London", col: "#f14ad4"}
@@ -127,8 +126,10 @@ d3.csv('./bft_data.csv').then(function(data) {
     // account for incoming (not defined in imports) and outgoing (imports)
     function bilink(root) {
         const map = new Map(root.leaves().map(d => [id(d), d]));
-        
+        for (const d of root.leaves()) console.log(d) ;
+
         for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
+        
         for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
         return root;
       }
@@ -139,7 +140,7 @@ d3.csv('./bft_data.csv').then(function(data) {
     const root = tree(bilink(d3.hierarchy(data)
       .sort((a, b) => d3.ascending(a.height, b.height) || d3.ascending(a.data.name, b.data.name))));
 
-    
+    //console.log(root.leaves())
 
 
     const svg = d3.select('body').append("svg")
@@ -154,6 +155,7 @@ d3.csv('./bft_data.csv').then(function(data) {
         .data(root.leaves())
         .join("g")
         .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+        .attr('id', function(d) { return d.data.name})
         .on("mouseover", overed)
         .on("mouseout", outed)
        
@@ -177,11 +179,8 @@ d3.csv('./bft_data.csv').then(function(data) {
         .attr('id', function(d) { return d.data.name})
         .text(function(d){ return nodes.filter(x => x.xid == d.data.name)[0].name})
         .each(function(d) { d.text = this; })
+        .each(function(d) {d.suh = 'dude'})
         
-
-    // node.append('circle')
-    //   .attr('r', 40)
-    //   .style('fille', 'red')
 
     const link = svg.append("g")
         .attr("stroke", colornone)
@@ -190,10 +189,9 @@ d3.csv('./bft_data.csv').then(function(data) {
         .data(root.leaves().flatMap(leaf => leaf.outgoing))
         .join("path")
         .style("mix-blend-mode", "multiply")
-        //.style('stroke', 'grey')//function(d) { return color.filter(x => x.loc == d[0].data.location)[0].col})//color.filter(x => x.loc == d.data.location)[0].col})
         .attr("d", ([i, o]) => line(i.path(o)))
-        .attr('class', function(d) { return d[0].data.location})
-        .attr('id', function(d) { return d[0].data.name})
+        .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
+        .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
         .each(function(d) { d.path = this; });
     // var sizes = {'very small': 3, 'small': 4, 'medium': 5, 'medium/large': 5, 'large': 6}
 
@@ -206,23 +204,24 @@ d3.csv('./bft_data.csv').then(function(data) {
     function overed(d) {
         link.style("mix-blend-mode", null);
         d3.select(this).attr("font-weight", "bold");
-        // d3.selectAll('circle').style('opacity', 0)
-
-        d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", 'red').raise();
-        d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", 'red').attr("font-weight", "bold");
-        d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", 'red').raise();
-        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", 'red').attr("font-weight", "bold");
+        // console.log(d.data.name)
+        // console.log(d.incoming.map(d => d.path))
+        // d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", 'red').raise();
+        // d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", 'red').attr("font-weight", "bold");
+        // d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", 'red').raise();
+        // d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", 'red').attr("font-weight", "bold");
         
+        var test = d3.select(this).attr('id')
+        console.log('.' + test + 'size')
+        d3.selectAll('.' + test + 'size').attr('stroke', 'blue').raise()
+        d3.selectAll('.' + test + 'loc').attr('stroke', 'red').raise()
+
         var current = d.outgoing.map(([, d]) => d.circle).concat(d.incoming.map(([, d]) => d.circle))
                         .concat(d.outgoing.map(([, d]) => d.text)).concat(d.incoming.map(([, d]) => d.text))
         var circles = d3.selectAll('circle, text').nodes()
         var filt = circles.filter(x => !current.includes(x))
-        d3.selectAll(filt).style('opacity', 0.2)
-
-
-        
-        
-        
+        d3.selectAll(filt).style('opacity', 0.2) 
+         
       }
       
 
