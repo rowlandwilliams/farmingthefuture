@@ -1,3 +1,9 @@
+// document.getElementById('dashboard').setAttribute('style', 'width:' + window.innerWidth * 0.3)
+// document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight)
+// document.getElementById('network').setAttribute('style', 'width:' + window.innerWidth * 0.6)
+// document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight)
+
+
 d3.csv('./bft_data.csv').then(function(data) {
    
     var groups = [... new Set(data.map(x => x.Grouping2))].map((y,i) => ({
@@ -64,7 +70,7 @@ d3.csv('./bft_data.csv').then(function(data) {
     var sizeLinks = getLinks('size')
 
   
-    var links = sizeLinks.concat(locationLinks)
+    var links = locationLinks.concat(sizeLinks)
     console.log(links.filter(x => x.link_id2 == 'x0x1'))
     
     // nested array
@@ -143,7 +149,7 @@ d3.csv('./bft_data.csv').then(function(data) {
     //console.log(root.leaves())
 
 
-    const svg = d3.select('body').append("svg")
+    const svg = d3.select('#network').append("svg")
       .attr("viewBox", [-width  , -height, width * 2, height * 10]);
 
     // add nodes
