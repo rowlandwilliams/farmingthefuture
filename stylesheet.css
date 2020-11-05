@@ -1,2 +1,19 @@
+body {
+    
+}
 
+#wrapper {
+    display: flex;
+    width: 100%
+}
 
+#dashboard {
+    width: 15%;
+    background-color: red;
+    
+}
+
+#network {
+    width: 85%;
+    /* background-color: blue; */
+}
