@@ -1,5 +1,5 @@
 body {
-    
+    background-color:lightgrey
 }
 
 #wrapper {
@@ -9,7 +9,7 @@ body {
 
 #dashboard {
     width: 15%;
-    background-color: red;
+    /* background-color: red; */
     
 }
 

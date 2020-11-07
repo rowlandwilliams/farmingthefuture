@@ -27,7 +27,7 @@ d3.json(link).then(function(data) {
      
     var width = document.getElementById('network').offsetWidth;
     var height = document.getElementById('network').offsetHeight;
-    var radius = width * 0.5;
+    var radius = Math.min(width, height) * 0.7
 
     colornone = "#ccc"
     tree = d3.cluster()
@@ -80,7 +80,7 @@ d3.json(link).then(function(data) {
         .each(function(d) {
             // calculate angle from respective 0
             d.angle = d.x * 180 / Math.PI - 90
-            console.log(d);
+            
             
         })
        
@@ -93,193 +93,97 @@ d3.json(link).then(function(data) {
         .style('fill', function(d) { return test(d.data.group)})
         .each(function(d) { d.circle = this; })
 
-    // node.append('rect')
-    //     .attr('width', 30)
-    //     .attr('height', 0.5)
-    //     .style('fill', 'black')
-    //     .attr('class', 'nodeLine')
-    //     .attr('id', function(d) { return d.data.name})
+   
 
 
     node.append('rect')
-        .attr('width', 50)
+        .attr('width', 30)
         .attr('height', 0.5)
         //.attr('x', function(d) {  return 30 * Math.cos(Math.abs(`${d.x * 180 / Math.PI - 90}` )) })
-        .style('fill', 'red')
+        .style('fill', 'grey')
         .attr('class', 'nodeLine2')
         .attr('id', function(d) { return d.data.name})
-        .attr("transform", function(d) {return d.x < Math.PI ? 'rotate(' + (-1 * `${d.x * 180 / Math.PI - 90}`) + ')' : 'rotate(' + `${d.x * -180 / Math.PI - 90}` + ')'})
         
         
+       var pos2 = []; 
     const labels = node  	        
         .append("text")	        
         .attr("dy", "0.31em")	   
-        .attr("x", d => d.x < Math.PI ? 50 : -50)	
-        // .attr("y", function(d) { if (d.x < Math.PI * 0.15) {  return -2 / d.x }
-        //                         else if (d.x > Math.PI * 0.92 && d.x < Math.PI) {  return 5 * d.x }
-        //                         else if (d.x > Math.PI * 1.85) {  return -2 * d.x }})
-                                // else { return 0 }})
-        // d => d.x < (Math.PI * 1.5) && d.x > (Math.PI * 0.5) ? 30 : -30)      
-        .attr('class', function(d) {return d.data.location})	  
-        .attr('width', 50)
-        .attr('height', 0.5)
+        .attr("x", d => d.x < Math.PI ? 30 : -30)		    
+        .attr('class', 'label')	  
         .style('fill', 'grey')
-        .attr('class', 'nodeLine2')
-        .attr('id', function(d) { return d.data.name})	        
-        .text(function(d){  
-                             return nodes.filter(x => x.xid == d.data.name)[0].name})	        
-        .each(function(d) { 
-            
-            d.text = this; })
-        
-        .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")	 
-        .attr("transform", function(d) { return this.getAttribute('transform') +
+        .attr('id', function(d) { return  'lab' + d.data.name})	        
+        .text(function(d){  return nodes.filter(x => x.xid == d.data.name)[0].name})	        
+        .each(function(d) { d.text = this; })
+        .attr("text-anchor", d => d.x < Math.PI ? "start" : "end") 
+        .attr("transform", function(d) { return this.getAttribute('transform') + // rotate back to horizontal
                 d.x < Math.PI ? 'rotate(' + (-1 * `${d.x * 180 / Math.PI - 90}`) + ')' : 'rotate(' + `${d.x * -180 / Math.PI + 90}` + ')' })
-                // 'rotate(' + `${d.x * -180 / Math.PI - 90}` + ')'})	       
-        // .attr("transform", function(d) {return this.getAttribute('transform') + d.x > 2.5 ? this.getAttribute('transform')  + 'translate(' + -50
-        // + ',0)' :  'translate(0,10)'})
+        .each(function(d) {
+            var temp = []    
+            var bbox = this.getBBox();
+            console.log(bbox)
+                d.bL = bbox.x 
+                d.bR = d.x + bbox.x + bbox.width
+                d.bY = bbox.y + d.y
+                temp.push(d.bL)
+                temp.push(d.bR)
+                temp.push(d.bY)
+                
+                
+                pos2.push(temp)
+        });
+   
+console.log(pos2)
+    
+        
+        
+    
+    
+    
+    
 
+
+
+    
 
     var prev;
     labels.each(function(d, i) {
           if(i > 0) {
             var thisbb = this.getBoundingClientRect(),
                 prevbb = prev.getBoundingClientRect();
-                
-            // position right
+              
+            // position overlapping
             if(!(thisbb.right < prevbb.left || 
                     thisbb.left > prevbb.right || 
                     thisbb.bottom < prevbb.top || 
                     thisbb.top > prevbb.bottom)) {
-                
-                if (d.x < 0.5 * Math.PI) {
-                    d3.select(prev).attr("y", -prevbb.height / 2 / d.x)
-                }
-                
-                else if (d.x >= Math.PI && d.x < Math.PI *1.5) {
-                    d3.select(prev).attr("y", prevbb.height / d.x / (d.x-Math.PI))
-                    //d3.select(this).attr("y", prevbb.bottom)   
-                    
-                    }
-            
-                
-            }
-            if (d.x > 0.5*Math.PI && d.x < Math.PI) {
-                  
-                d3.select(this).attr("y", Math.pow(d.x, 6)/ 20)
                  
-                
-                //d3.select(prev).attr("y", prevbb.height * 3)
+            }
+            // posiition each quadrant separately
+            if (d.x > 0.5*Math.PI && d.x <= Math.PI) {  // 2nd quad
+                d3.select(this).attr("y", Math.pow(d.x, 6)/ 20 + thisbb.height)
                 }
             
-            else if (d.x > 1.5*Math.PI && d.x < 2 * Math.PI) {
-                    d3.select(this).attr("y", -Math.pow((d.x-Math.PI),6)/ 25)
-                     
-                    
-                    //d3.select(prev).attr("y", prevbb.height * 3)
-                    }
+            else if (d.x <= 0.5 * Math.PI) { // 1st quad
+                    d3.select(prev).attr("y", -prevbb.height / 2 / d.x - thisbb.height)
+                }
 
+            else if (d.x >= 1.5*Math.PI && d.x < 2 * Math.PI) {  // 4th quad
+                    d3.select(this).attr("y", -Math.pow((d.x-Math.PI),6)/ 25 - thisbb.height)
+                    }
             
+            else if (d.x >= Math.PI && d.x < Math.PI *1.5) { // 3rd quad
+                        d3.select(this).attr("y", thisbb.height / d.x / (d.x-Math.PI) + thisbb.height)
+                        }
+
           }
           prev = this;
         });
         
-    // svg.selectAll("text")
-    //     .data(root.leaves())
-    //     .enter()
-    //     .append("text")
-    //     .attr("text-anchor", "middle")
-    //     .attr("x", function(d) {
-            
-    //         var a = Math.abs(`${d.x * 180 / Math.PI - 90}`)
-            
-    //         //d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
-    //         d.cx = Math.cos(a) * (radius - 75);
-    //         return d.x = Math.cos(a) * (radius - 20);
-    //     })
-    //     .attr("y", function(d) {
-    //         var a = Math.abs(`${d.x * 180 / Math.PI - 90}`)
-    //         d.cy = Math.sin(a) * (radius - 75);
-    //         return d.y = Math.sin(a) * (radius - 20);
-    //     })
-    //     .each(function(d) {
-    //         var bbox = this.getBBox();
-    //         d.sx = d.x - bbox.width/2 - 2;
-    //         d.ox = d.x + bbox.width/2 + 2;
-    //         d.sy = d.oy = d.y + 5;
-    //     });
 
 
-
+    // d3.selectAll('.label'){}
         
-    var right = []
-    d3.selectAll(".right").each( function(d, i){
-          right.push(d3.select(this).attr("id"))
-        
-      })
-
-    var left = []
-      d3.selectAll(".left").each( function(d, i){
-            left.push(d3.select(this).attr("id"))
-        })
-
-    left = left.reverse()
-
-    var row = height/(left.length)
-    
-    var pos = []
-    for (var i =0; i<left.length; i++) {
-        pos.push(row * i)
-    }
-
-    
-    // const labels = svg.selectAll('label')
-    //     .data(nodes.filter(x => left.includes(x.xid)))
-    //     .enter().append('text')
-    //     .attr('class', d => 'label')
-    //     .attr('id', d => d.xid)
-    //     .attr('fill', '#' + Math.floor(Math.random()*16777215).toString(16))
-    //     .attr('font-size', '12px')
-    //     .attr('x', -width / 2)
-    //     .attr('y', d => pos[left.indexOf(d.xid)] - (height / 2) + (row / 2))
-    //     .text(d => d.name)
-                 
-
-    var dims = []
-    d3.selectAll(".label").each( function(){
-        var box =  d3.select(this).node().getBBox() 
-        var id =  d3.select(this).attr('id');
-        var bR = {'x': (box.x + box.width), 'y': (box.y + box.height / 2)}
-        dims.push(bR)
-      })
-    
-    var posLines = [];
-    
-    d3.selectAll(".nodeLine").each( function(d){
-        var id =  d3.select(this).attr('id');
-        var box =  d3.select(this).node().getBoundingClientRect();
-
-        var bR = {}
-        id == 'right' ? bR.x = d.x + box.x + box.width : bR.x = d.x + box.x ;
-        bR.y = d.y + box.y 
-        posLines.push(bR)
-      })
-
-
-
-
-
-    // svg.selectAll('nodeLine2')
-    //   .data(nodes.filter(x => left.includes(x.xid)))
-    //   .enter().append('line')
-    //   .attr('stroke', 'blue')
-    //   .attr('stroke-width', 3)
-    //   .attr('x1', d => posLines[left.indexOf(d.xid)].x)// - (width / 2))
-    //   .attr('x2', d => posLines[left.indexOf(d.xid)].x + 300)
-    //   .attr('y1', d => posLines[left.indexOf(d.xid)].y)// - (height / 2) + (row / 2))
-    //   .attr('y2', d => posLines[left.indexOf(d.xid)].y)
-
-
     const link = svg.append("g")
         .attr("stroke", colornone)
         .attr('fill', 'none')
@@ -295,12 +199,12 @@ d3.json(link).then(function(data) {
 
 
     function overed(d) {
-        link.style("mix-blend-mode", null);
+        link.style("mix-blend-mode", null)
         d3.select(this).attr("font-weight", "bold");
         
         var nodeId = d3.select(this).attr('id')
-        d3.selectAll('.' + nodeId + 'size').attr('stroke', 'blue').raise()
-        d3.selectAll('.' + nodeId + 'loc').attr('stroke', 'red').raise()
+        d3.selectAll('.' + nodeId + 'size').attr('stroke', '#ff8fc1').raise()
+        d3.selectAll('.' + nodeId + 'loc').attr('stroke', '#77DD77').raise().style("mix-blend-mode", null);
 
         d3.select('#db_name').text(nodes.filter(x => x.xid == nodeId)[0].name)
         d3.select('#db_sizetext').text(nodes.filter(x => x.xid == nodeId)[0].size)
