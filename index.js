@@ -191,6 +191,7 @@ console.log(pos2)
         .data(root.leaves().flatMap(leaf => leaf.outgoing))
         .join("path")
         .style("mix-blend-mode", "multiply")
+        .style('opacity', 0.4)
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
         .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
@@ -203,8 +204,8 @@ console.log(pos2)
         d3.select(this).attr("font-weight", "bold");
         
         var nodeId = d3.select(this).attr('id')
-        d3.selectAll('.' + nodeId + 'size').attr('stroke', '#ff8fc1').raise()
-        d3.selectAll('.' + nodeId + 'loc').attr('stroke', '#77DD77').raise().style("mix-blend-mode", null);
+        d3.selectAll('.' + nodeId + 'size').attr('stroke', '#ff8fc1').raise().style('opacity', 1)
+        d3.selectAll('.' + nodeId + 'loc').attr('stroke', '#77DD77').raise().style('opacity', 1)
 
         d3.select('#db_name').text(nodes.filter(x => x.xid == nodeId)[0].name)
         d3.select('#db_sizetext').text(nodes.filter(x => x.xid == nodeId)[0].size)
@@ -221,7 +222,7 @@ console.log(pos2)
 
 
       function outed(d) {
-        link.style("mix-blend-mode", "multiply");
+        link.style("mix-blend-mode", "multiply").style('opacity', 0.4)
         d3.select(this).attr("font-weight", null);
 
         d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", null);
