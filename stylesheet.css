@@ -12,8 +12,7 @@ body {
 
 
 #wrapper {
-    display: flex;
-    
+    display: flex;   
 }
 
 #dashboard {
@@ -26,6 +25,7 @@ body {
     justify-content: space-between;
     flex-direction: column;
     margin: 10px 0px 10px 10px;
+    position: relative;
 }
 
 #network {
@@ -38,14 +38,22 @@ body {
 
 }
 
+#db_stats {
+    position: absolute;
+    top: 50%;
+    width: 90%;
+}
+
 #db_location {
     /* background-color: #77DD77; */
     padding-left: 4px;
     border-radius: 2px;
     display: flex;
     justify-content: space-between;
+    
 
 }
+
 #db_size {
     /* background-color: #ff8fc1; */
     padding-left: 4px;

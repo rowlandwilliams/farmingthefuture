@@ -1,6 +1,6 @@
 //import fs from 'fs';
 document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
-document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight + 'px')
+document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
 
 var link = './nested.json'
 //var link = './bft_data.csv'
@@ -29,7 +29,7 @@ d3.json(link).then(function(data) {
      
      
     var width = document.getElementById('network').offsetWidth;
-    var height = document.getElementById('network').offsetHeight * 0.95;
+    var height = document.getElementById('network').offsetHeight;
     var radius = Math.min(width, height) * 0.7
 
     colornone = "#ccc"
@@ -63,7 +63,7 @@ d3.json(link).then(function(data) {
 
 
     const svg = d3.select('#network').append("svg")
-      .attr("viewBox", [-width / 2  , -height / 2, width , height ])
+      .attr("viewBox", [-width / 2  , -height / 2, width , height + 100])
       .attr('class', 'svg')
 
 
