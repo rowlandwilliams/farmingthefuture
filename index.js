@@ -171,24 +171,24 @@ d3.json(link).then(function(data) {
     labels.each(function(d,i) {
                         d3.select(this).attr('y',  d.transY )
                         d3.select(this).attr('x',  d.transX)
-                        d.labWidth = this.getBBox().width + 5
-                    
+                        d.labWidth = this.getBBox().width + 5  
                 })
 
 
         
     node.append('rect')
             .attr('width', d => d.nLength)
-            .attr('height', 0.5)
+            .attr('height', 0.75)
             .style('fill', 'grey')
-            .attr('class', 'nodeLine2')
+            .attr('class', 'nodeLine')
             .attr('id', function(d) { return d.data.name})
+            .each(function(d) { d.nodeLine1 = this; });
         
     node.append('rect')
             .attr('width', d => d.labWidth)
-            .attr('height', 0.5)
+            .attr('height', 0.75)
             .style('fill', 'grey')
-            .attr('class', 'nodeLine2')
+            .attr('class', 'nodeLine')
             .attr('id', function(d) { return d.data.name})
             .attr("transform", function(d) { return this.getAttribute('transform') + // rotate back to horizontal
                     d.x < Math.PI ? 'rotate(' + (-1 * `${d.x * 180 / Math.PI - 90}`) + ')' : 'rotate(' + (-1 * `${d.x * 180 / Math.PI + 90}`) + ')' })
@@ -212,6 +212,7 @@ d3.json(link).then(function(data) {
                 }
                 
             })
+            .each(function(d) { d.nodeLine2 = this; });
 
     
         // add circles
@@ -240,7 +241,10 @@ d3.json(link).then(function(data) {
 
         var current = d.outgoing.map(([, d]) => d.circle).concat(d.incoming.map(([, d]) => d.circle))
                         .concat(d.outgoing.map(([, d]) => d.text)).concat(d.incoming.map(([, d]) => d.text))
-        var circles = d3.selectAll('circle.node, text.label').nodes()
+                        .concat(d.outgoing.map(([, d]) => d.nodeLine1)).concat(d.incoming.map(([, d]) => d.nodeLine1))
+                        .concat(d.outgoing.map(([, d]) => d.nodeLine2)).concat(d.incoming.map(([, d]) => d.nodeLine2))
+
+        var circles = d3.selectAll('circle.node, text.label, .nodeLine').nodes()
         var filt = circles.filter(x => !current.includes(x))
         d3.selectAll(filt).style('opacity', 0.2) 
          
@@ -257,7 +261,7 @@ d3.json(link).then(function(data) {
         d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", null);
         d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", null).attr("font-weight", null);
 
-        var circles = d3.selectAll('circle.node, text.label').nodes()
+        var circles = d3.selectAll('circle.node, text.label, .nodeLine').nodes()
         d3.selectAll(circles).style('opacity', 1)
 
         d3.select('#db_name').text('')
