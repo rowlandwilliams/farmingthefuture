@@ -17,7 +17,6 @@ body {
 
 #dashboard {
     width: 15%;
-    height: 90%;
     background-color: #F5F5F5;
     border-radius: 10px;
     padding: 10px;
@@ -30,7 +29,11 @@ body {
 
 #network {
     width: 85%;
-    /* background-color: blue; */
+    margin: 10px 10px 10px 10px;
+    background-color: #F5F5F5;
+    border-radius: 10px;
+    padding: 10px;
+
 }
 
 .label, .legend {
@@ -99,7 +102,7 @@ body {
     background-color: #77DD87;
   }
   #sizeSlider {
-        background-color: #ff8fc1;
+    background-color: #ff8fc1;
 
   }
   

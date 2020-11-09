@@ -30,7 +30,7 @@ d3.json(link).then(function(data) {
      
     var width = document.getElementById('network').offsetWidth;
     var height = document.getElementById('network').offsetHeight;
-    var radius = Math.min(width, height) * 0.7
+    var radius = Math.min(width, height) * 0.71
 
     colornone = "#ccc"
     tree = d3.cluster()
@@ -63,7 +63,7 @@ d3.json(link).then(function(data) {
 
 
     const svg = d3.select('#network').append("svg")
-      .attr("viewBox", [-width / 2  , -height / 2, width , height + 100])
+      .attr("viewBox", [-width / 2  , -height / 2, width , height])
       .attr('class', 'svg')
 
 
@@ -103,7 +103,7 @@ d3.json(link).then(function(data) {
         .each(function(d) {
             // calculate angle from respective 0
             // node to label length and associated transltation from node
-            var nLength = 30
+            var nLength = 15
             var labOffset = 5
 
             if (d.x < 0.5*Math.PI) {
