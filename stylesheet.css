@@ -1,19 +1,56 @@
+html {
+    box-sizing: border-box;
+  }
+
+
 body {
-    background-color:lightgrey
+  
+  margin: 0;
+  background-color:lightgrey;
+  font-family: 'Crimson Text', serif;
 }
+
 
 #wrapper {
     display: flex;
-    width: 100%
+    
 }
 
 #dashboard {
     width: 15%;
-    /* background-color: red; */
-    
+    height: 90%;
+    background-color: #F5F5F5;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin: 10px 0px 10px 10px;
 }
 
 #network {
     width: 85%;
     /* background-color: blue; */
 }
+
+.label, .legend {
+    font-family: 'Crimson Text', serif;
+
+}
+
+#db_location {
+    background-color: #77DD77;
+    padding-left: 4px;
+    border-radius: 2px;
+
+}
+#db_size {
+    background-color: #ff8fc1;
+    padding-left: 4px;
+    border-radius: 2px;
+}
+
+.node {
+    z-index: 10;
+}
+

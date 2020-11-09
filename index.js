@@ -1,5 +1,5 @@
 //import fs from 'fs';
-document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight + 'px')
+document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
 document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight + 'px')
 
 var link = './nested.json'
@@ -8,7 +8,6 @@ var link = './nested.json'
 
 d3.json(link).then(function(data) {
    
-    
     var nodes = data.nodes
     var links = data.links
     var nest = data.nest
@@ -16,12 +15,18 @@ d3.json(link).then(function(data) {
 
     // set random colours
     var color = [... new Set(nodes.map(x => x.loc))].map(y => ({'loc': y, 'col': '#' + Math.floor(Math.random()*16777215).toString(16)}))
-    var colG = ["#fefcdc", "#f3f6f7", "#45eaf0", "#8ed253", "#a80348", "#a52a94", "#d21044"]
-    var colorGroup = [... new Set(nodes.map(x => x.group))].map((y,i) => ({'group': y, 'col': colG[i]}));
+    var colG = ['#ffb347', "#fdfd96", "#45eaf0", "#8ed253", "#a80348", "#a52a94", "#d21044"]
     
-    //console.log(colG[1])
-    var test = d3.scaleOrdinal(d3.schemeSet1)
+    var groups = ['group0', 'group1', 'group2', 'group3', 'group4', 'group5', 'group6']
+    var groupNames = ['Farmer\'s Network', 'NGO Policy / Campaign group', 
+                        'Research Organisation', 'Community Food Project', 'Ethical Business', 'Education']
     
+    
+    
+                        var nodeColour = d3.scaleOrdinal(d3.schemeSet1)
+    var colorGroup = [... new Set(nodes.map(x => x.group))].map((y) => ({'group': y, 'col': nodeColour[y]}));
+
+     
      
     var width = document.getElementById('network').offsetWidth;
     var height = document.getElementById('network').offsetHeight * 0.95;
@@ -69,6 +74,20 @@ d3.json(link).then(function(data) {
     var change4 = 0;
 
 
+    const link = svg.append("g")
+        .attr("stroke", colornone)
+        .attr('fill', 'none')
+        .selectAll("path")
+        .data(root.leaves().flatMap(leaf => leaf.outgoing))
+        .join("path")
+        .style("mix-blend-mode", "multiply")
+        .style('opacity', 0.4)
+        .attr("d", ([i, o]) => line(i.path(o)))
+        .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
+        .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
+        .each(function(d) { d.path = this; });
+    
+
     const node = svg.append("g")
         .attr("font-family", "sans-serif")
         .attr("font-size", 10)
@@ -77,7 +96,7 @@ d3.json(link).then(function(data) {
         .data(root.leaves())
         .join("g")
         .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-        .attr('class', function(d) {return d.x < Math.PI ? "right" : "left"})
+        .attr('class', d => 'group ' + d.data.group)
         .attr('id', function(d) { return d.data.name})
         .on("mouseover", overed)
         .on("mouseout", outed)
@@ -129,15 +148,6 @@ d3.json(link).then(function(data) {
             }     
         })
        
-    // add circles
-    node
-        .append('circle')
-        .attr('r', 3)
-        .attr('class', 'node')
-        .attr('id', function(d) { return d.data.name})
-        //.attr('class', function(d) {return d.x < Math.PI ? "right" : "left"})
-        .style('fill', function(d) { return test(d.data.group)})
-        .each(function(d) { d.circle = this; })
 
    
 
@@ -146,7 +156,9 @@ d3.json(link).then(function(data) {
             .attr("dy", "0.31em")	   
             .attr("x", d => d.x < Math.PI ? 30 : -30)		    
             .attr('class', 'label')	  
-            .style('fill', 'grey')
+            .style('fill', '#202020')
+            .style('font-size', '12px')
+            .style('font-weight', 200)
             .attr('id', function(d) { return  'lab' + d.data.name})	        
             .text(function(d){  return nodes.filter(x => x.xid == d.data.name)[0].name})	        
             .each(function(d) { d.text = this; })
@@ -200,51 +212,18 @@ d3.json(link).then(function(data) {
                 }
                 
             })
+
     
-
-    function makeAbsoluteContext(element) {
-                var bbox = element.getBBox(),
-                ux1 = bbox.x,
-                ux2 = bbox.x + bbox.width,
-                uy = bbox.y + bbox.height;
-                
-                var offset = d3.select('.svg').node().getBoundingClientRect();
-                var matrix = element.getScreenCTM();
-                
-                return {
-                    ux1: (matrix.a * ux1) + (matrix.c * uy) + matrix.e - offset.left,
-                    ux2: (matrix.a * ux2) + (matrix.c * uy) + matrix.e - offset.left,
-                    uy: (matrix.b * ux1) + (matrix.d * uy) + matrix.f - offset.top
-                
-                };
-            }
-
-    labels.each( function(d) { 
-                d.ux1 = makeAbsoluteContext(this).ux1
-                d.ux2 = makeAbsoluteContext(this).ux2
-                d.uy = makeAbsoluteContext(this).uy   
-            })
-
-        node.each(function(d) {
-            d.nx = makeAbsoluteContext(this).ux1
-            d.ny = makeAbsoluteContext(this).uy
-        })
+        // add circles
+    node
+        .append('circle')
+        .attr('r', 5)
+        .attr('class', 'node')
+        .attr('id', function(d) { return d.data.name})//.attr('class', function(d) {return d.x < Math.PI ? "right" : "left"})
+        .style('fill', function(d) { return colG[groups.indexOf(d.data.group)]})
+        .each(function(d) { d.circle = this; })
 
 
-        
-    const link = svg.append("g")
-        .attr("stroke", colornone)
-        .attr('fill', 'none')
-        .selectAll("path")
-        .data(root.leaves().flatMap(leaf => leaf.outgoing))
-        .join("path")
-        .style("mix-blend-mode", "multiply")
-        .style('opacity', 0.4)
-        .attr("d", ([i, o]) => line(i.path(o)))
-        .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
-        .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-        .each(function(d) { d.path = this; });
-    
 
 
     function overed(d) {
@@ -261,7 +240,7 @@ d3.json(link).then(function(data) {
 
         var current = d.outgoing.map(([, d]) => d.circle).concat(d.incoming.map(([, d]) => d.circle))
                         .concat(d.outgoing.map(([, d]) => d.text)).concat(d.incoming.map(([, d]) => d.text))
-        var circles = d3.selectAll('circle, text').nodes()
+        var circles = d3.selectAll('circle.node, text.label').nodes()
         var filt = circles.filter(x => !current.includes(x))
         d3.selectAll(filt).style('opacity', 0.2) 
          
@@ -278,7 +257,7 @@ d3.json(link).then(function(data) {
         d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", null);
         d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", null).attr("font-weight", null);
 
-        var circles = d3.selectAll('circle, text').nodes()
+        var circles = d3.selectAll('circle.node, text.label').nodes()
         d3.selectAll(circles).style('opacity', 1)
 
         d3.select('#db_name').text('')
@@ -286,4 +265,42 @@ d3.json(link).then(function(data) {
         d3.select('#db_sizelocation').text('')
       }
 
+      
+      // LEGEND
+      // append legend svg to dashboard
+      const legend = d3.select('#legend').append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('class', 'legend')
+
+      const dots = legend.append("g")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 10)
+        .attr('fill', '#202020')
+        .selectAll("g")
+        .data(groupNames)
+        .join("g")
+        .attr('id', function(d, i) { return groups[i] })
+        .attr('transform', function (d,i) { return 'translate(15,' + (20 * (i + 1)) + ')' })
+        .on('mouseover', lMouseover)
+        .on('mouseout', lMouseout)
+ 
+      dots.append('circle')
+        .attr('r', 5)  
+        .style('fill', function(d, i) { return colG[i]})
+
+      dots
+        .append('text')
+        .attr('class', 'legend')
+        .text(d => d)
+        .attr('transform', 'translate(8,2.5)')
+
+      function lMouseover() {
+        var group = d3.select(this).attr('id')
+        d3.selectAll('g.group:not(.' + group + ')').style('opacity', 0.5)
+      }
+        
+      function lMouseout() {
+        d3.selectAll('g.group').style('opacity', 1)
+      }
     })
