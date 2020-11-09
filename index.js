@@ -60,11 +60,17 @@ d3.json(link).then(function(data) {
 
 
     const svg = d3.select('#network').append("svg")
-      .attr("viewBox", [-width / 2  , -height / 2, width , height ]);
+      .attr("viewBox", [-width / 2  , -height / 2, width , height ])
+      .attr('class', 'svg')
 
 
-    // add nodes
-    
+    // add change var for each quadrant for label adjustment
+    var change1 = 20;
+    var change2 = 0;
+    var change3 = 20;
+    var change4 = 0;
+
+
     const node = svg.append("g")
         .attr("font-family", "sans-serif")
         .attr("font-size", 10)
@@ -79,7 +85,49 @@ d3.json(link).then(function(data) {
         .on("mouseout", outed)
         .each(function(d) {
             // calculate angle from respective 0
-            d.angle = d.x * 180 / Math.PI - 90
+            // node to label length
+            var nLength = 30
+            var labOffset = 5
+
+            if (d.x < 0.5*Math.PI) {
+                if (d.x < 0.12*Math.PI) {
+                    nLength = nLength + change1
+                    change1 = change1 - 5  
+                }
+                d.angle = Math.abs(d.x * 180 / Math.PI - 90);
+                d.transX = nLength * Math.cos(d.angle * Math.PI / 180) + labOffset;
+                d.transY = -nLength * Math.sin(d.angle * Math.PI / 180) - labOffset;
+            }
+            else if(d.x >= 0.5*Math.PI && d.x < Math.PI) {
+                if (d.x > 0.85*Math.PI) {
+                    nLength = nLength + change2
+                    change2 = change2 + 5  
+                }
+                d.angle = d.x * 180 / Math.PI - 90
+                d.transX = nLength * Math.cos(d.angle * Math.PI / 180) + labOffset;
+                d.transY = (nLength * Math.sin(d.angle * Math.PI / 180)) + labOffset;
+            }
+            else if (d.x >= Math.PI && d.x < Math.PI * 1.5) {
+                if (d.x < 1.1*Math.PI) {
+                    nLength = nLength + change3
+                    change3 = change3 - 5  
+                }
+                d.angle = 180 - ( d.x * 180 / Math.PI - 90);
+                d.transX = -(nLength * Math.cos(d.angle * Math.PI / 180)) -labOffset;
+                d.transY = (nLength * Math.sin(d.angle * Math.PI / 180)) + labOffset;
+            }
+            else  {
+                if (d.x > 1.85*Math.PI) {
+                    nLength = nLength + change4
+                    change4 = change4 + 5  
+                }
+                d.angle =  d.x * 180 / Math.PI - 90 - 180
+                d.transX = -(nLength * Math.cos(d.angle * Math.PI / 180)) -labOffset;
+                d.transY = -nLength * Math.sin(d.angle * Math.PI / 180) -labOffset;
+            }
+            console.log(d)
+            //console.log(d.angle, d.data.name)
+            
             
             
         })
@@ -104,9 +152,11 @@ d3.json(link).then(function(data) {
         .attr('class', 'nodeLine2')
         .attr('id', function(d) { return d.data.name})
         
+   
         
-       var pos2 = []; 
-    const labels = node  	        
+
+    
+const labels = node  	        
         .append("text")	        
         .attr("dy", "0.31em")	   
         .attr("x", d => d.x < Math.PI ? 30 : -30)		    
@@ -118,71 +168,89 @@ d3.json(link).then(function(data) {
         .attr("text-anchor", d => d.x < Math.PI ? "start" : "end") 
         .attr("transform", function(d) { return this.getAttribute('transform') + // rotate back to horizontal
                 d.x < Math.PI ? 'rotate(' + (-1 * `${d.x * 180 / Math.PI - 90}`) + ')' : 'rotate(' + `${d.x * -180 / Math.PI + 90}` + ')' })
-        .each(function(d) {
-            var temp = []    
-            var bbox = this.getBBox();
-            console.log(bbox)
-                d.bL = bbox.x 
-                d.bR = d.x + bbox.x + bbox.width
-                d.bY = bbox.y + d.y
-                temp.push(d.bL)
-                temp.push(d.bR)
-                temp.push(d.bY)
-                
-                
-                pos2.push(temp)
-        });
-   
-console.log(pos2)
-    
-        
-        
-    
-    
-    
-    
-
-
+       
 
     
 
-    var prev;
-    labels.each(function(d, i) {
-          if(i > 0) {
-            var thisbb = this.getBoundingClientRect(),
-                prevbb = prev.getBoundingClientRect();
+    // var prev;
+    // labels.each(function(d, i) {
+    //       if(i > 0) {
+    //         var thisbb = this.getBoundingClientRect(),
+    //             prevbb = prev.getBoundingClientRect();
               
-            // position overlapping
-            if(!(thisbb.right < prevbb.left || 
-                    thisbb.left > prevbb.right || 
-                    thisbb.bottom < prevbb.top || 
-                    thisbb.top > prevbb.bottom)) {
+    //         // position overlapping
+    //         if(!(thisbb.right < prevbb.left || 
+    //                 thisbb.left > prevbb.right || 
+    //                 thisbb.bottom < prevbb.top || 
+    //                 thisbb.top > prevbb.bottom)) {
                  
-            }
-            // posiition each quadrant separately
-            if (d.x > 0.5*Math.PI && d.x <= Math.PI) {  // 2nd quad
-                d3.select(this).attr("y", Math.pow(d.x, 6)/ 20 + thisbb.height)
-                }
+    //         }
+    //         // posiition each quadrant separately
+    //         if (d.x > 0.5*Math.PI && d.x <= Math.PI) {  // 2nd quad
+    //             d3.select(this).attr("y", Math.pow(d.x, 6)/ 20 + thisbb.height)
+    //             }
             
-            else if (d.x <= 0.5 * Math.PI) { // 1st quad
-                    d3.select(prev).attr("y", -prevbb.height / 2 / d.x - thisbb.height)
-                }
+    //         else if (d.x <= 0.5 * Math.PI) { // 1st quad
+    //                 d3.select(prev).attr("y", -prevbb.height / 2 / d.x - thisbb.height)
+    //             }
 
-            else if (d.x >= 1.5*Math.PI && d.x < 2 * Math.PI) {  // 4th quad
-                    d3.select(this).attr("y", -Math.pow((d.x-Math.PI),6)/ 25 - thisbb.height)
-                    }
+    //         else if (d.x >= 1.5*Math.PI && d.x < 2 * Math.PI) {  // 4th quad
+    //                 d3.select(this).attr("y", -Math.pow((d.x-Math.PI),6)/ 25 - thisbb.height)
+    //                 }
             
-            else if (d.x >= Math.PI && d.x < Math.PI *1.5) { // 3rd quad
-                        d3.select(this).attr("y", thisbb.height / d.x / (d.x-Math.PI) + thisbb.height)
-                        }
+    //         else if (d.x >= Math.PI && d.x < Math.PI *1.5) { // 3rd quad
+    //                     d3.select(this).attr("y", thisbb.height / d.x / (d.x-Math.PI) + thisbb.height)
+    //                     }
 
-          }
-          prev = this;
-        });
+    //       }
+    //       prev = this;
+    //     });
         
 
+      // first 5 labels distribut evenly from 5th label to top of chart
 
-    // d3.selectAll('.label'){}
+
+    function makeAbsoluteContext(element) {
+            var bbox = element.getBBox(),
+            ux1 = bbox.x,
+            ux2 = bbox.x + bbox.width,
+            uy = bbox.y + bbox.height;
+            
+            var offset = d3.select('.svg').node().getBoundingClientRect();
+            var matrix = element.getScreenCTM();
+            
+            return {
+                ux1: (matrix.a * ux1) + (matrix.c * uy) + matrix.e - offset.left,
+                ux2: (matrix.a * ux2) + (matrix.c * uy) + matrix.e - offset.left,
+                uy: (matrix.b * ux1) + (matrix.d * uy) + matrix.f - offset.top
+              
+            };
+          }
+
+    labels.each( function(d) {
+            
+            d.ux1 = makeAbsoluteContext(this).ux1
+            d.ux2 = makeAbsoluteContext(this).ux2
+            d.uy = makeAbsoluteContext(this).uy
+            
+            
+            
+        })
+
+
+    // labels now rotated back to normal, now adjust y height
+    // first 5 labels in quad 1
+
+    labels.each(function(d,i) {
+       
+        
+            // calculate absolute size of from 5th position to top
+
+            d3.select(this).attr('y',  d.transY )
+            d3.select(this).attr('x',  d.transX)
+        
+    })
+    
         
     const link = svg.append("g")
         .attr("stroke", colornone)
