@@ -63,9 +63,9 @@ d3.json(link).then(function(data) {
 
 
     // add change var for each quadrant for label adjustment
-    var change1 = 20;
+    var change1 = 25;
     var change2 = 0;
-    var change3 = 20;
+    var change3 = 25;
     var change4 = 0;
 
 
@@ -90,7 +90,7 @@ d3.json(link).then(function(data) {
             if (d.x < 0.5*Math.PI) {
                 if (d.x < 0.12*Math.PI) {
                     nLength = nLength + change1
-                    change1 = change1 - 5  
+                    change1 = change1 - 8  
                 }
                 d.nLength = nLength
                 d.angle = Math.abs(d.x * 180 / Math.PI - 90);
@@ -100,7 +100,7 @@ d3.json(link).then(function(data) {
             else if(d.x >= 0.5*Math.PI && d.x < Math.PI) {
                 if (d.x > 0.85*Math.PI) {
                     nLength = nLength + change2
-                    change2 = change2 + 5  
+                    change2 = change2 + 8  
                 }
                 d.nLength = nLength
                 d.angle = d.x * 180 / Math.PI - 90
@@ -110,7 +110,7 @@ d3.json(link).then(function(data) {
             else if (d.x >= Math.PI && d.x < Math.PI * 1.5) {
                 if (d.x < 1.1*Math.PI) {
                     nLength = nLength + change3
-                    change3 = change3 - 5  
+                    change3 = change3 - 8  
                 }
                 d.nLength = nLength
                 d.angle = 180 - ( d.x * 180 / Math.PI - 90);
@@ -120,7 +120,7 @@ d3.json(link).then(function(data) {
             else  {
                 if (d.x > 1.85*Math.PI) {
                     nLength = nLength + change4
-                    change4 = change4 + 5  
+                    change4 = change4 + 8  
                 }
                 d.nLength = nLength
                 d.angle =  d.x * 180 / Math.PI - 90 - 180
