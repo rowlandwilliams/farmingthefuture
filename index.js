@@ -81,7 +81,7 @@ d3.json(link).then(function(data) {
         .data(root.leaves().flatMap(leaf => leaf.outgoing))
         .join("path")
         .style("mix-blend-mode", "multiply")
-        .style('opacity', 0.4)
+        .style('opacity', 0.2)
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
         .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
@@ -236,7 +236,7 @@ d3.json(link).then(function(data) {
 
         d3.select('#db_name').text(nodes.filter(x => x.xid == nodeId)[0].name)
         d3.select('#db_sizetext').text(nodes.filter(x => x.xid == nodeId)[0].size)
-        d3.select('#db_sizelocation').text(nodes.filter(x => x.xid == nodeId)[0].loc)
+        d3.select('#db_locationText').text(nodes.filter(x => x.xid == nodeId)[0].loc)
 
         var current = d.outgoing.map(([, d]) => d.circle).concat(d.incoming.map(([, d]) => d.circle))
                         .concat(d.outgoing.map(([, d]) => d.text)).concat(d.incoming.map(([, d]) => d.text))
@@ -249,7 +249,7 @@ d3.json(link).then(function(data) {
 
 
       function outed(d) {
-        link.style("mix-blend-mode", "multiply").style('opacity', 0.4)
+        link.style("mix-blend-mode", "multiply").style('opacity', 0.2)
         d3.select(this).attr("font-weight", null);
 
         d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", null);
@@ -262,7 +262,7 @@ d3.json(link).then(function(data) {
 
         d3.select('#db_name').text('')
         d3.select('#db_sizetext').text('')
-        d3.select('#db_sizelocation').text('')
+        d3.select('#db_locationText').text('')
       }
 
       

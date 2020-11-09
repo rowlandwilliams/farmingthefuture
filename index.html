@@ -14,14 +14,36 @@
             <div id='db_name'></div>
         </div>
         <div id='db_stats'>
-            <div id='db_location'>Location: <span id='db_sizelocation'></span></div>
-            <div id='db_size'>Size: <span id='db_sizetext'></span></div>
-        </div>
-        <div id='legend'></div>
+            <div id='db_location'>
+                <div>Location</div>
+                <div id='db_locationText'>
+                </div>
+                <div class='db_location_toggle'>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round" id='locSlider'></span>
+                    </label>
+                </div>
+            </div>
 
+
+            <div id='db_size'>
+                <div>Size: </div> 
+                <div id='db_sizetext'></div>
+                <div class='db_size_toggle'>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round" id='sizeSlider'></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    <div id='legend'></div>
     </div>
+        
     <div id='network'></div>
-   </div>
+   
+  </div>
 </body>
 
 <script src="https://d3js.org/d3.v5.min.js"></script>
