@@ -1,4 +1,4 @@
-d3.csv(link).then(function(data) {
+d3.csv('./bft_data.csv').then(function(data) {
    
     var groups = [... new Set(data.map(x => x.Grouping2))].map((y,i) => ({
         'group': y,
@@ -20,7 +20,7 @@ d3.csv(link).then(function(data) {
     
     function getLinks(category) {
         var matrix = [];
-        var copy = nodes;
+        var copy = [...nodes];
         
         for (var i=0; i<nodes.length; i++) {
             var temp = [];
@@ -56,6 +56,7 @@ d3.csv(link).then(function(data) {
         return links
     }
 
+    
     //var links = getLinks('loc'), getLinks('Grouping'))
     var locationLinks = getLinks('loc');
     var groupLinks = getLinks('group')
@@ -63,7 +64,9 @@ d3.csv(link).then(function(data) {
 
   
     var links = locationLinks.concat(sizeLinks)
-    console.log(links.filter(x => x.link_id2 == 'x0x1'))
+    console.log(nodes)
+    console.log(links)
+    // console.log(links.filter(x => x.link_id2 == 'x0x1'))
     
     // nested array
     var nest = {'name': 'ftf', 'children': []};
@@ -76,11 +79,45 @@ d3.csv(link).then(function(data) {
             'name': z.xid,
             'group': z.group,
             'category': links.filter(x => x.source == z.xid).map(x => x.category),
-            'imports': links.filter(x => x.source == z.xid).map(y => y.target)
+            'location_imports': locationLinks.filter(x => x.source == z.xid).map(y => y.target)
+                .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id),
+            'size_imports': sizeLinks.filter(x => x.source == z.xid).map(y => y.target)
                 .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
+            
         }))
     }))
 
+
+    // var test = nodes.map(x => ({
+    //     'name': 'ftf.' + x.group + '.' + x.xid,
+    //     'imports': links.filter(y => y.source == x.xid).map(z => z.target)
+    //     .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
+    // }))
+
+
+    // function hierarchy(data, delimiter = ".") {
+    //     let root;
+    //     const map = new Map;
+    //     data.forEach(function find(data) {
+    //       const {name} = data;
+    //       if (map.has(name)) return map.get(name);
+    //       const i = name.lastIndexOf(delimiter);
+    //       map.set(name, data);
+    //       if (i >= 0) {
+    //         find({name: name.substring(0, i), children: []}).children.push(data);
+    //         data.name = name.substring(i + 1);
+    //       } else {
+    //         root = data;
+    //       }
+    //       return data;
+    //     });
+    //     return root;
+    //   }
+
+    //   var testData = hierarchy(test, '.')
+    //   console.log(testData)
+
+    console.log(nest)
     var fullData = {'nodes': nodes, 'links': links, 'nest': nest}
 
     fullData = JSON.stringify(fullData)

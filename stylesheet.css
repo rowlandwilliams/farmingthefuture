@@ -93,17 +93,16 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #77DD87;
     -webkit-transition: .4s;
     transition: .4s;
   }
 
-  #locSlider {
+  #locSlider + .slider{
     background-color: #77DD87;
   }
-  #sizeSlider {
-    background-color: #ff8fc1;
 
+  #sizeSlider + .slider{
+    background-color: #ff8fc1;
   }
   
   .slider:before {
@@ -118,7 +117,7 @@ body {
     transition: .4s;
   }
   
-  input:checked + .slider {
+  #locSlider:checked + .slider, #sizeSlider:checked + .slider {
     background-color:#ccc;
   }
   
