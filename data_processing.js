@@ -79,6 +79,8 @@ d3.csv('./bft_data.csv').then(function(data) {
             'name': z.xid,
             'group': z.group,
             'category': links.filter(x => x.source == z.xid).map(x => x.category),
+            'imports': links.filter(x => x.source == z.xid).map(y => y.target)
+                .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id),
             'location_imports': locationLinks.filter(x => x.source == z.xid).map(y => y.target)
                 .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id),
             'size_imports': sizeLinks.filter(x => x.source == z.xid).map(y => y.target)

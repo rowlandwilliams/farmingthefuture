@@ -1,3 +1,5 @@
+// const { ENETRESET } = require("constants")
+
 
 //import fs from 'fs';
 document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
@@ -54,8 +56,9 @@ d3.json(link).then(function(data) {
     // account for incoming (not defined in imports) and outgoing (imports)
     function bilink(root) {
         const map = new Map(root.leaves().map(d => [id(d), d]));
-        for (const d of root.leaves()) d.loc_outgoing = d.data.location_imports.map(i => [d, map.get(i)],
-             d.size_outgoing = d.data.size_imports.map(i => [d, map.get(i)]))
+        for (const d of root.leaves()) d.outgoing = d.data.imports.map(i => [d, map.get(i)]), 
+            d.loc_outgoing = d.data.location_imports.map(i => [d, map.get(i)]),
+             d.size_outgoing = d.data.size_imports.map(i => [d, map.get(i)])
         
         //for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
         return root;
@@ -82,38 +85,70 @@ d3.json(link).then(function(data) {
     let g = svg.append('g')
             .attr('class', 'links')
 
-    let link = g.append("g")
-        .attr('class', 'locPath')
-        .attr("stroke", colornone)
-        .attr('fill', 'none')
-        .selectAll("path")
+
+
+    // let link = g
+    //     .attr("stroke", colornone)
+    //     .attr('fill', 'none')
+    //     .selectAll("path")
+    //     .data(root.leaves().flatMap(leaf => leaf.outgoing))
+    //     .enter()
+    //     .append('path')
+    //     .style("mix-blend-mode", "multiply")
+    //     .style('opacity', 0.2)
+    //     .attr("d", ([i, o]) => line(i.path(o)))
+    //     .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
+    //     .each(function(d) { d.path = this; });
+    let sizelinks = g.append('g')
+    .attr('class', 'loc')
+    .attr("stroke", colornone)
+    .attr('fill', 'none')
+
+sizelinks.selectAll('path')
+    .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
+    .enter()
+    .append('path')
+    .style("mix-blend-mode", "multiply")
+    .style('opacity', 0.2)
+    // .style('stroke', 'pink')
+    .attr("d", ([i, o]) => line(i.path(o)))
+    .each(function(d) { d.size_path = this; });
+
+
+    let loclinks = g.append('g')
+      .attr('class', 'loc')
+      .attr("stroke", colornone)
+      .attr('fill', 'none')
+    
+    loclinks.selectAll('path')
         .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
-        .join("path")
+        .enter()
+        .append('path')
         .style("mix-blend-mode", "multiply")
         .style('opacity', 0.2)
+        // .style('stroke', 'green')
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
         .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-        // .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
-        .each(function(d) { d.path = this; });
+        .each(function(d) { d.loc_path = this; });
 
     
 
 
-    let link2 = g.append("g")
-        .attr('class', 'sizePath')
-        .attr("stroke", 'red')
-        .attr('fill', 'none')
-        .selectAll("path")
-        .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
-        .join("path")
-        .style("mix-blend-mode", "multiply")
-        .style('opacity', 0.2)
-        .attr("d", ([i, o]) => line(i.path(o)))
-        // .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
-        // .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-        // .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
-        .each(function(d) { d.path = this; });
+    // let link2 = g.append("g")
+    //     .attr('class', 'sizePath')
+    //     .attr("stroke", 'red')
+    //     .attr('fill', 'none')
+    //     .selectAll("path")
+    //     .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
+    //     .join("path")
+    //     .style("mix-blend-mode", "multiply")
+    //     .style('opacity', 0.2)
+    //     .attr("d", ([i, o]) => line(i.path(o)))
+    //     // .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
+    //     // .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
+    //     // .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
+    //     .each(function(d) { d.path = this; });
 
     //     .selectAll("path")
     //     .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
@@ -267,9 +302,12 @@ d3.json(link).then(function(data) {
 
 
     function overed(d) {
-        link.style("mix-blend-mode", null)
-        
-        d3.selectAll(d.outgoing.map(d => d.path)).attr('stroke', '#77DD77').raise().style('opacity', 1)
+        g.selectAll('path').style("mix-blend-mode", null)
+        console.log(d)
+
+        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).attr('stroke', '#77DD77').raise().style('opacity', 1).style("mix-blend-mode", 'multiply')
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).attr('stroke', 'pink').raise().style('opacity', 1)
+
         d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr('fill', '#77DD77').raise().style('opacity', 1)
         
         var nodeId = d3.select(this).attr('id')
@@ -292,7 +330,7 @@ d3.json(link).then(function(data) {
 
 
     function outed(d) {
-        link.style("mix-blend-mode", "multiply").style('opacity', 0.2)
+        //g.style("mix-blend-mode", "multiply").style('opacity', 0.2)
         d3.select(this).attr("font-weight", null);
 
         
@@ -335,7 +373,7 @@ d3.json(link).then(function(data) {
         .attr('class', 'legend')
         .text(d => d)
         .attr('transform', 'translate(8,2.5)')
-
+      console.log(root.leaves())
     function lMouseover() {
         var group = d3.select(this).attr('id')
         d3.selectAll('g.group:not(.' + group + ')').style('opacity', 0.5)
@@ -350,32 +388,29 @@ d3.json(link).then(function(data) {
         .on('change', updateLocation)
 
     function updateLocation() {
-        
-        g.selectAll('path')
-         .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
-         .exit()
-         .remove()
-
-        
-        
-        // var newData2 = newData.slice(0,)
-        
+        // var index = root.leaves().map(leaf => [leaf.data.category.indexOf('loc'), leaf.data.category.lastIndexOf('loc')])
         
 
-        // svg.selectAll("path")
-        //     .data(newData2)
-        //     //.exit()
-        //     .remove()
+        var test = loclinks.selectAll("path")
+            .data(root.leaves().flatMap(leaf => leaf.loc_outgoing.slice(0, 0)))
 
-            
+
+        test.exit().remove()
+        console.log(test)
+
+        // test
+        //     .enter()
+        //     .append('path')
+        //     .style('stroke','red')
+        //     .style("mix-blend-mode", "multiply")
+        //     .style('opacity', 0.2)
+        //     .attr("d", ([i, o]) => line(i.path(o)))
+            // .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
+            // .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
+            // .each(function(d) { d.path = this; });
+        
 
         
-            //     exit => exit
-            //         .style('fill', 'red')
-            //         .transition(t)
-            //         .attr('transform', (d,i) => `translate(${ 100 },${ i * 30 })`)
-            //         .remove()
-            // )
         
         }
         
