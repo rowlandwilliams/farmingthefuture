@@ -41,29 +41,32 @@ body {
 
 }
 
+#db_title {
+  text-align: center;
+}
+
+#db_instructions {
+  padding: 4px 0px 10px 0px;
+  font-size: 11px;
+  border-bottom: 0.3px solid lightgrey;
+  text-align: center;
+}
+
 #db_stats {
     position: absolute;
     top: 50%;
     width: 90%;
 }
 
-#db_location {
+#db_location, #db_size {
     /* background-color: #77DD77; */
     padding-left: 4px;
     border-radius: 2px;
     display: flex;
     justify-content: space-between;
     
-
 }
 
-#db_size {
-    /* background-color: #ff8fc1; */
-    padding-left: 4px;
-    border-radius: 2px;
-    display: flex;
-    justify-content: space-between;
-}
 
 .node {
     z-index: 10;

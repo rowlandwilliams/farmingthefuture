@@ -237,9 +237,14 @@ d3.json(link).then(function(data) {
 
     function overed(d) {
         g.selectAll('path').style("mix-blend-mode", null)
-        
+        console.log(d)
         d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#ff8fc1').raise().style('opacity', 1)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '#77DD77').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
+
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#ff8fc1')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#ff8fc1')
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#77DD77')
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#77DD77')
 
         sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#ff8fc1').style('opacity', 1) : null,
         locState == 'on' ? d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", '#77DD77').style('opacity', 1) : null
@@ -264,6 +269,11 @@ d3.json(link).then(function(data) {
 
         d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", null).style('opacity', 1)
         d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", null).style('opacity', 1)
+
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', 'grey')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', 'grey')
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style('fill', 'grey')
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style('fill', 'grey')
 
         d3.select('#db_name').text('')
         d3.select('#db_sizetext').text('')
