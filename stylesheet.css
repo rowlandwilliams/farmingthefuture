@@ -2,14 +2,11 @@ html {
     box-sizing: border-box;
   }
 
-
 body {
-  
   margin: 0;
-  background-color:lightgrey;
+  background-color:#F5F5F5;
   font-family: 'Crimson Text', serif;
 }
-
 
 #wrapper {
     display: flex;   
@@ -17,31 +14,23 @@ body {
 
 #dashboard {
     width: 15%;
-    background-color: #F5F5F5;
+    background-color: white;
+    opacity: 0.9;
     border-radius: 10px;
     padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
     margin: 10px 0px 10px 10px;
     position: relative;
+    height: auto;
 }
 
 #network {
     width: 85%;
     margin: 10px 10px 10px 10px;
-    background-color: #F5F5F5;
     border-radius: 10px;
     padding: 10px;
-
 }
 
-.label, .legend {
-    font-family: 'Crimson Text', serif;
-
-}
-
-#db_title {
+#db_titlewrap {
   text-align: center;
 }
 
@@ -49,24 +38,51 @@ body {
   padding: 4px 0px 10px 0px;
   font-size: 11px;
   border-bottom: 0.3px solid lightgrey;
+  /* text-align: center; */
+}
+
+#db_orgwrap {
+  height: 8%;
+  border-bottom: 0.3px solid lightgrey;
   text-align: center;
+  padding-top: 10px;
+}
+
+#db_name {
+  font-size: 12px;
 }
 
 #db_stats {
-    position: absolute;
-    top: 50%;
-    width: 90%;
+    padding: 10px 0px;
+    border-bottom: 0.3px solid lightgrey;
 }
 
-#db_location, #db_size {
-    /* background-color: #77DD77; */
-    padding-left: 4px;
+#db_locationheader, #db_size {
+    padding: 0px 4px 0px 4px;
     border-radius: 2px;
     display: flex;
     justify-content: space-between;
-    
+    align-items: center; 
 }
 
+#legend {
+  padding-bottom: 10px;
+}
+
+.db_stat {
+    height: 20px;
+    text-align: center;
+    font-size: 12px;
+}
+
+#credits {
+  font-size: 11px;
+  text-align: center;
+}
+
+#credits_link {
+  color: black;
+}
 
 .node {
     z-index: 10;
@@ -101,11 +117,11 @@ body {
   }
 
   #locSlider + .slider{
-    background-color: #77DD87;
+    background-color: #966FD6;
   }
 
   #sizeSlider + .slider{
-    background-color: #ff8fc1;
+    background-color: #5bc0de;
   }
   
   .slider:before {
@@ -143,4 +159,11 @@ body {
     border-radius: 50%;
   }
 
+  #legend {
+    height: 20%;
+  }
   
+  .label, .legend {
+    font-family: 'Crimson Text', serif;
+
+}

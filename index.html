@@ -9,31 +9,31 @@
 <body>
    <div id='wrapper'>
     <div id='dashboard'>
-        <div >
-            <div id='db_title'>Farming the Future</div>
-            <div id='db_instructions'>Hover over an organization in the network to explore its connections. Filter connection types using the sliders below. Use the key to identify types of organizations in the network.
-                
-                
-            </div>
-            <div id='db_name'></div>
+        <div id='db_titlewrap'>
+            <div id='db_title' class='db_text'>Farming the Future</div>
+            <div id='db_instructions' class='db_text'>Hover over an organization in the network to explore its connections. Filter connection types using the sliders below. Use the key to identify types of organizations in the network.</div>
+        </div>
+        <div id='db_orgwrap'>
+            <div id='db_orgname' class='db_text'>Organization name:</div>
+            <div id='db_name' class='db_text'></div>
         </div>
         <div id='db_stats'>
             <div id='db_location'>
-                <div>Location</div>
-                <div id='db_locationText'>
-                </div>
-                <div class='db_location_toggle'>
-                    <label class="switch">
-                        <input type="checkbox" id='locSlider'>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
+                <div id='db_locationheader'>
+                    <div>Location</div>
+                    <div class='db_location_toggle'>
+                        <label class="switch">
+                            <input type="checkbox" id='locSlider'>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>   
+                <div id='db_locationText' class='db_stat'>
+                </div> 
             </div>
-
-
+            
             <div id='db_size'>
                 <div>Size: </div> 
-                <div id='db_sizetext'></div>
                 <div class='db_size_toggle'>
                     <label class="switch">
                         <input type="checkbox" id='sizeSlider'>
@@ -41,8 +41,10 @@
                     </label>
                 </div>
             </div>
+            <div id='db_sizetext' class='db_stat'></div>
         </div>
-    <div id='legend'></div>
+        <div id='legend'></div>
+        <div id='credits'>Visualisation by <a id='credits_link' href="www.rowlandwilliams.me" rel="noopener noreferrer" target="_blank" >Rowland Williams</a></div>
     </div>
         
     <div id='network'></div>

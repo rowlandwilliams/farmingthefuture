@@ -2,7 +2,7 @@
 
 
 //import fs from 'fs';
-document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
+// document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
 document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
 
 var link = './nested2.json'
@@ -237,17 +237,17 @@ d3.json(link).then(function(data) {
 
     function overed(d) {
         g.selectAll('path').style("mix-blend-mode", null)
-        console.log(d)
-        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#ff8fc1').raise().style('opacity', 1)
-        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '#77DD77').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
+        
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#5bc0de').raise().style('opacity', 1)
+        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '966FD6').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
 
-        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#ff8fc1')
-        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#ff8fc1')
-        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#77DD77')
-        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#77DD77')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#5bc0de')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#5bc0de')
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#966FD6')
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#966FD6')
 
-        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#ff8fc1').style('opacity', 1) : null,
-        locState == 'on' ? d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", '#77DD77').style('opacity', 1) : null
+        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#5bc0de').style('opacity', 1) : null,
+        locState == 'on' ? d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", '#966FD6').style('opacity', 1) : null
 
         var nodeId = d3.select(this).attr('id')
 
@@ -308,7 +308,7 @@ d3.json(link).then(function(data) {
         .attr('class', 'legend')
         .text(d => d)
         .attr('transform', 'translate(8,2.5)')
-      console.log(root.leaves())
+      
     
     function lMouseover() {
         var group = d3.select(this).attr('id')
@@ -339,8 +339,6 @@ d3.json(link).then(function(data) {
         (g.selectAll('.sizepath').style('visibility', 'hidden'), sizeState = 'off'  ) : 
         (g.selectAll('.sizepath').style('visibility', 'visible'), sizeState = 'on') 
         }
-        
-    
     })
 
     
