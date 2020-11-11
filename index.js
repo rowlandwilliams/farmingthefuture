@@ -13,29 +13,22 @@ var link = './nested2.json'
 d3.json(link).then(function(data) {
    
     var nodes = data.nodes
-    var links = data.links
     var nest = data.nest
     
 
-    // set random colours
-    var color = [... new Set(nodes.map(x => x.loc))].map(y => ({'loc': y, 'col': '#' + Math.floor(Math.random()*16777215).toString(16)}))
+    // set group colours
     var colG = ['#ffb347', "#fdfd96", "#45eaf0", "#8ed253", "#a80348", "#a52a94", "#d21044"]
-    
     var groups = ['group0', 'group1', 'group2', 'group3', 'group4', 'group5', 'group6']
     var groupNames = ['Farmer\'s Network', 'NGO Policy / Campaign group', 
                         'Research Organisation', 'Community Food Project', 'Ethical Business', 'Education']
     
     
-    
-    var nodeColour = d3.scaleOrdinal(d3.schemeSet1)
-    var colorGroup = [... new Set(nodes.map(x => x.group))].map((y) => ({'group': y, 'col': nodeColour[y]}));
-
-     
-     
+    // plot dimenstions     
     var width = document.getElementById('network').offsetWidth;
     var height = document.getElementById('network').offsetHeight;
     var radius = Math.min(width, height) * 0.71
 
+    // cluster data
     colornone = "#ccc"
     tree = d3.cluster()
         .size([2 * Math.PI, radius - 200])
@@ -57,7 +50,7 @@ d3.json(link).then(function(data) {
     function bilink(root) {
         const map = new Map(root.leaves().map(d => [id(d), d]));
         for (const d of root.leaves()) d.outgoing = d.data.imports.map(i => [d, map.get(i)]), 
-            d.loc_outgoing = d.data.location_imports.map(i => [d, map.get(i)]),
+            d.loc_outgoing = d.data.location_imports.map(i => [d, map.get(i)]), // create location and size outgoing
              d.size_outgoing = d.data.size_imports.map(i => [d, map.get(i)])
         
         //for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
@@ -87,99 +80,30 @@ d3.json(link).then(function(data) {
             .attr("stroke", colornone)
             .attr('fill', 'none')
 
+    g.selectAll('locpath') // append location links
+        .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
+        .enter()
+        .append('path')
+        .style("mix-blend-mode", "multiply")
+        .style('opacity', 0.2)
+        // .style('stroke', colornone)
+        .attr("d", ([i, o]) => line(i.path(o)))
+        .attr('class', 'locpath')
+        .each(function(d) { d.loc_path = this; });   
 
-
-    // let link = g
-    //     .attr("stroke", colornone)
-    //     .attr('fill', 'none')
-    //     .selectAll("path")
-    //     .data(root.leaves().flatMap(leaf => leaf.outgoing))
-    //     .enter()
-    //     .append('path')
-    //     .style("mix-blend-mode", "multiply")
-    //     .style('opacity', 0.2)
-    //     .attr("d", ([i, o]) => line(i.path(o)))
-    //     .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
-    //     .each(function(d) { d.path = this; });
-    // let sizelinks = g.append('g')
-    // .attr('class', 'loc')
-    // .attr("stroke", colornone)
-    // .attr('fill', 'none')
-// let loclinks = g.selectAll('path')
-//     .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
-//     .enter()
-//     .append('path')
-//     .style("mix-blend-mode", "multiply")
-//     .style('opacity', 0.2)
-//     .style('stroke', 'green')
-//     .attr("d", ([i, o]) => line(i.path(o)))
-//     .attr('class', 'loc')
-//     .each(function(d) { d.loc_path = this; });
-g.selectAll('locpath')
-    .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
-    .enter()
-    .append('path')
-    .style("mix-blend-mode", "multiply")
-    .style('opacity', 0.2)
-    // .style('stroke', colornone)
-    .attr("d", ([i, o]) => line(i.path(o)))
-    .attr('class', 'locpath')
-    .each(function(d) { d.loc_path = this; });   
-
-
-
-g.selectAll('sizepath')
-    .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
-    .enter()
-    .append('path')
-    .style("mix-blend-mode", "multiply")
-    .style('opacity', 0.2)
-    // .style('stroke', colornone)
-    .attr("d", ([i, o]) => line(i.path(o)))
-    .attr('class', 'sizepath')
-    .each(function(d) { d.size_path = this; });
-
-    console.log(root.leaves())
-
-
-    // let loclinks = g.append('g')
-    //   .attr('class', 'loc')
-    //   .attr("stroke", colornone)
-    //   .attr('fill', 'none')
-
-
+    g.selectAll('sizepath') // append size links
+        .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
+        .enter()
+        .append('path')
+        .style("mix-blend-mode", "multiply")
+        .style('opacity', 0.2)
+        // .style('stroke', colornone)
+        .attr("d", ([i, o]) => line(i.path(o)))
+        .attr('class', 'sizepath')
+        .each(function(d) { d.size_path = this; });
 
     
-
-
-    // let link2 = g.append("g")
-    //     .attr('class', 'sizePath')
-    //     .attr("stroke", 'red')
-    //     .attr('fill', 'none')
-    //     .selectAll("path")
-    //     .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
-    //     .join("path")
-    //     .style("mix-blend-mode", "multiply")
-    //     .style('opacity', 0.2)
-    //     .attr("d", ([i, o]) => line(i.path(o)))
-    //     // .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
-    //     // .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-    //     // .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
-    //     .each(function(d) { d.path = this; });
-
-    //     .selectAll("path")
-    //     .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
-    //     .join("path")
-    //     .style("mix-blend-mode", "multiply")
-    //     .style('opacity', 0.2)
-    //     .attr("d", ([i, o]) => line(i.path(o)))
-    //     .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
-    //     .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-    //     .each(function(d) { d.path = this; });
-
-    
-    
-    const node = svg.append("g")
+    const node = svg.append("g") // add nodes
         .attr("font-family", "sans-serif")
         .attr("font-size", 10)
         .attr('fill', '#202020')
@@ -236,13 +160,11 @@ g.selectAll('sizepath')
                 d.angle =  d.x * 180 / Math.PI - 90 - 180
                 d.transX = -(nLength * Math.cos(d.angle * Math.PI / 180)) -labOffset;
                 d.transY = -nLength * Math.sin(d.angle * Math.PI / 180) -labOffset;
-            }     
+            }     // node positioning
         })
        
 
-   
-
-    const labels = node  	        
+    const labels = node   // add labels	        
             .append("text")	        
             .attr("dy", "0.31em")	   
             .attr("x", d => d.x < Math.PI ? 30 : -30)		    
@@ -258,15 +180,13 @@ g.selectAll('sizepath')
                     d.x < Math.PI ? 'rotate(' + (-1 * `${d.x * 180 / Math.PI - 90}`) + ')' : 'rotate(' + `${d.x * -180 / Math.PI + 90}` + ')' })
         
 
-    //transform labels based on trig calculations
-    labels.each(function(d,i) {
+    labels.each(function(d,i) { //transform labels based on trig calculations
                         d3.select(this).attr('y',  d.transY )
                         d3.select(this).attr('x',  d.transX)
                         d.labWidth = this.getBBox().width + 5  
                 })
 
-
-        
+ 
     node.append('rect')
             .attr('width', d => d.nLength)
             .attr('height', 0.75)
@@ -305,9 +225,8 @@ g.selectAll('sizepath')
             })
             .each(function(d) { d.nodeLine2 = this; });
 
-    
-        // add circles
-    node
+
+    node // add circles
         .append('circle')
         .attr('r', 5)
         .attr('class', 'node')
@@ -316,32 +235,22 @@ g.selectAll('sizepath')
         .each(function(d) { d.circle = this; })
 
 
-
-
     function overed(d) {
         g.selectAll('path').style("mix-blend-mode", null)
-        console.log(d)
-        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', 'pink').raise().style('opacity', 1)
+        
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#ff8fc1').raise().style('opacity', 1)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '#77DD77').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
 
-        d3.selectAll(d.size_outgoing.map(d => d.text)).style('stroke', 'pink').raise().style('opacity', 1)
-        d3.selectAll(d.loc_outgoing.map(d => d.text)).style('stroke', '#77DD77').raise().style('opacity', 1)
-        
+        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#ff8fc1').style('opacity', 1) : null,
+        locState == 'on' ? d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", '#77DD77').style('opacity', 1) : null
+
         var nodeId = d3.select(this).attr('id')
 
         d3.select('#db_name').text(nodes.filter(x => x.xid == nodeId)[0].name)
         d3.select('#db_sizetext').text(nodes.filter(x => x.xid == nodeId)[0].size)
         d3.select('#db_locationText').text(nodes.filter(x => x.xid == nodeId)[0].loc)
 
-        var current = d.outgoing.map(([, d]) => d.circle)
-                        .concat(d.outgoing.map(([, d]) => d.text))
-                        .concat(d.outgoing.map(([, d]) => d.nodeLine1))
-                        .concat(d.outgoing.map(([, d]) => d.nodeLine2))
-        
-        var circles = d3.selectAll('circle.node, text.label, .nodeLine').nodes()
-        var filt = circles.filter(x => !current.includes(x));
-        d3.selectAll(filt).style('opacity', 0.2)
-        
+
       }
       
 
@@ -353,18 +262,14 @@ g.selectAll('sizepath')
         d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', null)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', null)
 
-        d3.selectAll(d.size_outgoing.map(d => d.text)).style('stroke', null).style('opacity', 1)
-        d3.selectAll(d.loc_outgoing.map(d => d.text)).style('stroke', null).style('opacity', 1)
-
-        var circles = d3.selectAll('circle.node, text.label, .nodeLine').nodes()
-        d3.selectAll(circles).style('opacity', 1)
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", null).style('opacity', 1)
+        d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", null).style('opacity', 1)
 
         d3.select('#db_name').text('')
         d3.select('#db_sizetext').text('')
         d3.select('#db_locationText').text('')
       }
-
-      
+ 
       // LEGEND
       // append legend svg to dashboard
     const legend = d3.select('#legend').append('svg')
@@ -404,47 +309,25 @@ g.selectAll('sizepath')
         d3.selectAll('g.group').style('opacity', 1)
       }
 
-      // update links
-    d3.select('.db_location_toggle')
+
+    d3.select('.db_location_toggle') // update location links
         .on('change', updateLocation)
 
     var locState = 'on'
     function updateLocation() {
-        if (locState == 'on') {
-            g.selectAll('.locpath').style('visibility', 'hidden')
-            locState = 'off'
-            console.log(locState)
+        locState == 'on' ? 
+        (g.selectAll('.locpath').style('visibility', 'hidden'), locState = 'off'  ) : 
+        (g.selectAll('.locpath').style('visibility', 'visible'), locState = 'on') 
         }
-        else {
-            g.selectAll('.locpath').style('visibility', 'visible')
-            locState = 'on'
-            console.log(locState)
 
-        }
-        // // var index = root.leaves().map(leaf => [leaf.data.category.indexOf('loc'), leaf.data.category.lastIndexOf('loc')])
-        // g.selectAll('.locpath').style('display', 'none')
-        //     .remove()
+    d3.select('.db_size_toggle') // update size links
+        .on('change', updateSize)
 
-        // g.data(root.leaves().flatMap(leaf => leaf.size_outgoing))
-
-
-        // g.exit().remove()
-        // console.log(g)
-
-        // test
-        //     .enter()
-        //     .append('path')
-        //     .style('stroke','red')
-        //     .style("mix-blend-mode", "multiply")
-        //     .style('opacity', 0.2)
-        //     .attr("d", ([i, o]) => line(i.path(o)))
-            // .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
-            // .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-            // .each(function(d) { d.path = this; });
-        
-
-        
-        
+    var sizeState = 'on'
+    function updateSize() {
+        locState == 'on' ? 
+        (g.selectAll('.sizepath').style('visibility', 'hidden'), sizeState = 'off'  ) : 
+        (g.selectAll('.sizepath').style('visibility', 'visible'), sizeState = 'on') 
         }
         
     
