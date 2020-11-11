@@ -84,6 +84,8 @@ d3.json(link).then(function(data) {
 
     let g = svg.append('g')
             .attr('class', 'links')
+            .attr("stroke", colornone)
+            .attr('fill', 'none')
 
 
 
@@ -99,38 +101,53 @@ d3.json(link).then(function(data) {
     //     .attr("d", ([i, o]) => line(i.path(o)))
     //     .attr("stroke", function(d) { return linkCol[links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category]})
     //     .each(function(d) { d.path = this; });
-    let sizelinks = g.append('g')
-    .attr('class', 'loc')
-    .attr("stroke", colornone)
-    .attr('fill', 'none')
+    // let sizelinks = g.append('g')
+    // .attr('class', 'loc')
+    // .attr("stroke", colornone)
+    // .attr('fill', 'none')
+// let loclinks = g.selectAll('path')
+//     .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
+//     .enter()
+//     .append('path')
+//     .style("mix-blend-mode", "multiply")
+//     .style('opacity', 0.2)
+//     .style('stroke', 'green')
+//     .attr("d", ([i, o]) => line(i.path(o)))
+//     .attr('class', 'loc')
+//     .each(function(d) { d.loc_path = this; });
+g.selectAll('locpath')
+    .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
+    .enter()
+    .append('path')
+    .style("mix-blend-mode", "multiply")
+    .style('opacity', 0.2)
+    // .style('stroke', colornone)
+    .attr("d", ([i, o]) => line(i.path(o)))
+    .attr('class', 'locpath')
+    .each(function(d) { d.loc_path = this; });   
 
-sizelinks.selectAll('path')
+
+
+g.selectAll('sizepath')
     .data(root.leaves().flatMap(leaf => leaf.size_outgoing))
     .enter()
     .append('path')
     .style("mix-blend-mode", "multiply")
     .style('opacity', 0.2)
-    // .style('stroke', 'pink')
+    // .style('stroke', colornone)
     .attr("d", ([i, o]) => line(i.path(o)))
+    .attr('class', 'sizepath')
     .each(function(d) { d.size_path = this; });
 
+    console.log(root.leaves())
 
-    let loclinks = g.append('g')
-      .attr('class', 'loc')
-      .attr("stroke", colornone)
-      .attr('fill', 'none')
-    
-    loclinks.selectAll('path')
-        .data(root.leaves().flatMap(leaf => leaf.loc_outgoing))
-        .enter()
-        .append('path')
-        .style("mix-blend-mode", "multiply")
-        .style('opacity', 0.2)
-        // .style('stroke', 'green')
-        .attr("d", ([i, o]) => line(i.path(o)))
-        .attr('class', function(d) { return d[0].data.name + links.filter(x => x.link_id2 == (d[0].data.name + d[1].data.name))[0].category})
-        .attr('id', function(d, i) { return d[0].data.name + d[1].data.name})
-        .each(function(d) { d.loc_path = this; });
+
+    // let loclinks = g.append('g')
+    //   .attr('class', 'loc')
+    //   .attr("stroke", colornone)
+    //   .attr('fill', 'none')
+
+
 
     
 
@@ -304,11 +321,11 @@ sizelinks.selectAll('path')
     function overed(d) {
         g.selectAll('path').style("mix-blend-mode", null)
         console.log(d)
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', 'pink').raise().style('opacity', 1)
+        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '#77DD77').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
 
-        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).attr('stroke', '#77DD77').raise().style('opacity', 1).style("mix-blend-mode", 'multiply')
-        d3.selectAll(d.size_outgoing.map(d => d.size_path)).attr('stroke', 'pink').raise().style('opacity', 1)
-
-        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr('fill', '#77DD77').raise().style('opacity', 1)
+        d3.selectAll(d.size_outgoing.map(d => d.text)).style('stroke', 'pink').raise().style('opacity', 1)
+        d3.selectAll(d.loc_outgoing.map(d => d.text)).style('stroke', '#77DD77').raise().style('opacity', 1)
         
         var nodeId = d3.select(this).attr('id')
 
@@ -330,12 +347,15 @@ sizelinks.selectAll('path')
 
 
     function outed(d) {
-        //g.style("mix-blend-mode", "multiply").style('opacity', 0.2)
+        g.selectAll('path').style("mix-blend-mode", "multiply").style('opacity', 0.2)
         d3.select(this).attr("font-weight", null);
 
-        
-        d3.selectAll(d.outgoing.map(d => d.path)).attr('stroke', null);
-        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr('fill', null)
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', null)
+        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', null)
+
+        d3.selectAll(d.size_outgoing.map(d => d.text)).style('stroke', null).style('opacity', 1)
+        d3.selectAll(d.loc_outgoing.map(d => d.text)).style('stroke', null).style('opacity', 1)
+
         var circles = d3.selectAll('circle.node, text.label, .nodeLine').nodes()
         d3.selectAll(circles).style('opacity', 1)
 
@@ -374,6 +394,7 @@ sizelinks.selectAll('path')
         .text(d => d)
         .attr('transform', 'translate(8,2.5)')
       console.log(root.leaves())
+    
     function lMouseover() {
         var group = d3.select(this).attr('id')
         d3.selectAll('g.group:not(.' + group + ')').style('opacity', 0.5)
@@ -387,16 +408,28 @@ sizelinks.selectAll('path')
     d3.select('.db_location_toggle')
         .on('change', updateLocation)
 
+    var locState = 'on'
     function updateLocation() {
-        // var index = root.leaves().map(leaf => [leaf.data.category.indexOf('loc'), leaf.data.category.lastIndexOf('loc')])
-        
+        if (locState == 'on') {
+            g.selectAll('.locpath').style('visibility', 'hidden')
+            locState = 'off'
+            console.log(locState)
+        }
+        else {
+            g.selectAll('.locpath').style('visibility', 'visible')
+            locState = 'on'
+            console.log(locState)
 
-        var test = loclinks.selectAll("path")
-            .data(root.leaves().flatMap(leaf => leaf.loc_outgoing.slice(0, 0)))
+        }
+        // // var index = root.leaves().map(leaf => [leaf.data.category.indexOf('loc'), leaf.data.category.lastIndexOf('loc')])
+        // g.selectAll('.locpath').style('display', 'none')
+        //     .remove()
+
+        // g.data(root.leaves().flatMap(leaf => leaf.size_outgoing))
 
 
-        test.exit().remove()
-        console.log(test)
+        // g.exit().remove()
+        // console.log(g)
 
         // test
         //     .enter()
