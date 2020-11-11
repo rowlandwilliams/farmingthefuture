@@ -325,7 +325,7 @@ d3.json(link).then(function(data) {
 
     var sizeState = 'on'
     function updateSize() {
-        locState == 'on' ? 
+        sizeState == 'on' ? 
         (g.selectAll('.sizepath').style('visibility', 'hidden'), sizeState = 'off'  ) : 
         (g.selectAll('.sizepath').style('visibility', 'visible'), sizeState = 'on') 
         }
