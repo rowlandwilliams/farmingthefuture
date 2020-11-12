@@ -5,8 +5,7 @@ function setDash() {
     document.getElementById('dashboard').setAttribute('style', 'height:' + db_height + 'px')
 }
 
-window.addEventListener('resize', setDash)
-setDash()
+
 
 document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px') // set graph height
 
@@ -26,7 +25,7 @@ d3.json(link).then(function(data) {
     var groups = ['group0', 'group1', 'group2', 'group3', 'group4', 'group5', 'group6']
     var groupNames = ['Farmer\'s Network', 'NGO Policy / Campaign group', 
                         'Research Organisation', 'Community Food Project', 'Ethical Business', 'Education']
-    var sizeColor = '#fca474'//'#7ef284'
+    var sizeColor = '#fca474'
     
     // plot dimenstions     
     var width = document.getElementById('network').offsetWidth;
@@ -51,14 +50,12 @@ d3.json(link).then(function(data) {
         return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
       }
 
-    // account for incoming (not defined in imports) and outgoing (imports)
+    // account for outgoing (imports)
     function bilink(root) {
         const map = new Map(root.leaves().map(d => [id(d), d]));
         for (const d of root.leaves()) d.outgoing = d.data.imports.map(i => [d, map.get(i)]), 
             d.loc_outgoing = d.data.location_imports.map(i => [d, map.get(i)]), // create location and size outgoing
              d.size_outgoing = d.data.size_imports.map(i => [d, map.get(i)])
-        
-        //for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
         return root;
       }
 
@@ -78,7 +75,6 @@ d3.json(link).then(function(data) {
     var change3 = 25;
     var change4 = 0;
 
-    var linkCol = {'loc': 'red', 'size': 'black'}
 
     let g = svg.append('g')
             .attr('class', 'links')
@@ -347,4 +343,6 @@ d3.json(link).then(function(data) {
         }
     })
 
+window.addEventListener('resize', setDash)
+setDash()
     
