@@ -12,6 +12,29 @@ body {
     display: flex;   
 }
 
+.warning-banner {
+  background-color: #202020;
+  color:#909089;
+  font-size: 14px;
+  font-weight: 300;
+  padding: 5px;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px 0 RGBA(0, 0, 0, 0.50);
+  animation: 0.5s ease-out 0s 1 slideInFromTop;
+  z-index: 100
+}
+
+
+@media only screen and (min-width : 945px) {
+  .warning-banner {
+    display: none;
+  }
+}
+
 #dashboard {
     /* height: auto; */
     width: 15%;
