@@ -29,7 +29,7 @@ d3.json(link).then(function(data) {
     
     // plot dimenstions     
     var width = document.getElementById('network').offsetWidth;
-    var height = document.getElementById('network').offsetHeight;
+    var height = document.getElementById('network').offsetHeight - 30;
     var radius = Math.min(width, height) * 0.71
 
     // cluster data
@@ -341,8 +341,13 @@ d3.json(link).then(function(data) {
         (g.selectAll('.sizepath').style('visibility', 'hidden'), sizeState = 'off'  ) : 
         (g.selectAll('.sizepath').style('visibility', 'visible'), sizeState = 'on') 
         }
+
+        window.addEventListener('resize', setDash)
+        setDash()
     })
+
 
 window.addEventListener('resize', setDash)
 setDash()
+
     
