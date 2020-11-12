@@ -1,8 +1,20 @@
-// const { ENETRESET } = require("constants")
+var padding = 30
+// get bottom of credits and use to set height
+function setDash() {
+    var db_height = document.getElementById('credits').getBoundingClientRect().y
+    document.getElementById('dashboard').setAttribute('style', 'height:' + db_height + 'px')
+}
+
+// window.on('resize', setDash).setDash()
+window.addEventListener('resize', setDash)
+setDash()
 
 
-//import fs from 'fs';
-// document.getElementById('dashboard').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
+// var db_height = document.getElementById('credits').getBoundingClientRect().y
+
+// document.getElementById('dashboard').setAttribute('style', 'height:' + db_height + 'px')
+
+
 document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
 
 var link = './nested2.json'
@@ -86,7 +98,7 @@ d3.json(link).then(function(data) {
         .append('path')
         .style("mix-blend-mode", "multiply")
         .style('opacity', 0.2)
-        // .style('stroke', colornone)
+        .style('stroke',  '#ff6691')
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', 'locpath')
         .each(function(d) { d.loc_path = this; });   
@@ -97,7 +109,7 @@ d3.json(link).then(function(data) {
         .append('path')
         .style("mix-blend-mode", "multiply")
         .style('opacity', 0.2)
-        // .style('stroke', colornone)
+        .style('stroke', ' #5bc0de')
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', 'sizepath')
         .each(function(d) { d.size_path = this; });
@@ -236,7 +248,7 @@ d3.json(link).then(function(data) {
 
 
     function overed(d) {
-        g.selectAll('path').style("mix-blend-mode", null)
+        g.selectAll('path').style("mix-blend-mode", null).style('stroke', colornone)
         
         d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#5bc0de').raise().style('opacity', 1)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '966FD6').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
@@ -261,7 +273,7 @@ d3.json(link).then(function(data) {
 
 
     function outed(d) {
-        g.selectAll('path').style("mix-blend-mode", "multiply").style('opacity', 0.2)
+        g.selectAll('path').style("mix-blend-mode", "multiply").style('opacity', 0.2).style('stroke', '')
         d3.select(this).attr("font-weight", null);
 
         d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', null)
