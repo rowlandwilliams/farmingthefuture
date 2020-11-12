@@ -109,7 +109,7 @@ body {
   
   /* The slider */
   .slider {
-    /* position: absolute; */
+    position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
@@ -124,11 +124,11 @@ body {
   }
 
   #sizeSlider + .slider{
-    background-color: #5bc0de;
+    background-color: #aec6cf;
   }
   
   .slider:before {
-    /* position: absolute; */
+    position: absolute;
     content: "";
     height: 12px;
     width: 12px;

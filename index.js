@@ -5,17 +5,10 @@ function setDash() {
     document.getElementById('dashboard').setAttribute('style', 'height:' + db_height + 'px')
 }
 
-// window.on('resize', setDash).setDash()
 window.addEventListener('resize', setDash)
 setDash()
 
-
-// var db_height = document.getElementById('credits').getBoundingClientRect().y
-
-// document.getElementById('dashboard').setAttribute('style', 'height:' + db_height + 'px')
-
-
-document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px')
+document.getElementById('network').setAttribute('style', 'height:' + window.innerHeight * 0.94 + 'px') // set graph height
 
 var link = './nested2.json'
 //var link = './bft_data.csv'
@@ -89,7 +82,7 @@ d3.json(link).then(function(data) {
 
     let g = svg.append('g')
             .attr('class', 'links')
-            .attr("stroke", colornone)
+            // .attr("stroke", colornone)
             .attr('fill', 'none')
 
     g.selectAll('locpath') // append location links
@@ -97,8 +90,8 @@ d3.json(link).then(function(data) {
         .enter()
         .append('path')
         .style("mix-blend-mode", "multiply")
-        .style('opacity', 0.2)
-        .style('stroke',  '#ff6691')
+        .style('opacity', 0.1)
+        .style('stroke',  '#966FD6')//'#966FD6')
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', 'locpath')
         .each(function(d) { d.loc_path = this; });   
@@ -109,12 +102,11 @@ d3.json(link).then(function(data) {
         .append('path')
         .style("mix-blend-mode", "multiply")
         .style('opacity', 0.2)
-        .style('stroke', ' #5bc0de')
+        .style('stroke', '#aec6cf')
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', 'sizepath')
         .each(function(d) { d.size_path = this; });
 
-    
     const node = svg.append("g") // add nodes
         .attr("font-family", "sans-serif")
         .attr("font-size", 10)
@@ -248,17 +240,17 @@ d3.json(link).then(function(data) {
 
 
     function overed(d) {
-        g.selectAll('path').style("mix-blend-mode", null).style('stroke', colornone)
+        g.selectAll('path').style("mix-blend-mode", null).style('opacity', 0.05)//.style('stroke', colornone)
         
-        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#5bc0de').raise().style('opacity', 1)
-        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '966FD6').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#aec6cf').raise().style('opacity', 1).style('stroke-width', 3)
+        d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '#966FD6').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
 
-        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#5bc0de')
-        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#5bc0de')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#aec6cf')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#aec6cf')
         d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#966FD6')
         d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#966FD6')
 
-        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#5bc0de').style('opacity', 1) : null,
+        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#aec6cf').style('opacity', 1) : null,
         locState == 'on' ? d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", '#966FD6').style('opacity', 1) : null
 
         var nodeId = d3.select(this).attr('id')
@@ -273,10 +265,10 @@ d3.json(link).then(function(data) {
 
 
     function outed(d) {
-        g.selectAll('path').style("mix-blend-mode", "multiply").style('opacity', 0.2).style('stroke', '')
+        g.selectAll('path').style("mix-blend-mode", "multiply").style('opacity', 0.1)
         d3.select(this).attr("font-weight", null);
 
-        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', null)
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', null).style('stroke-width', null)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', null)
 
         d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", null).style('opacity', 1)
