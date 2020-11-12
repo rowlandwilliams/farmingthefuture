@@ -22,11 +22,11 @@ d3.json(link).then(function(data) {
     
 
     // set group colours
-    var colG = ['#ffb347', "#fdfd96", "#45eaf0", "#8ed253", "#a80348", "#a52a94", "#d21044"]
+    var colG = ['#ffb347', "#45eaf0", "#fdfd96", "#8ed253", "#a80348", "#a52a94", "#d21044"]
     var groups = ['group0', 'group1', 'group2', 'group3', 'group4', 'group5', 'group6']
     var groupNames = ['Farmer\'s Network', 'NGO Policy / Campaign group', 
                         'Research Organisation', 'Community Food Project', 'Ethical Business', 'Education']
-    
+    var sizeColor = '#fca474'//'#7ef284'
     
     // plot dimenstions     
     var width = document.getElementById('network').offsetWidth;
@@ -101,8 +101,8 @@ d3.json(link).then(function(data) {
         .enter()
         .append('path')
         .style("mix-blend-mode", "multiply")
-        .style('opacity', 0.2)
-        .style('stroke', '#aec6cf')
+        .style('opacity', 0.1)
+        .style('stroke', sizeColor)
         .attr("d", ([i, o]) => line(i.path(o)))
         .attr('class', 'sizepath')
         .each(function(d) { d.size_path = this; });
@@ -240,17 +240,19 @@ d3.json(link).then(function(data) {
 
 
     function overed(d) {
-        g.selectAll('path').style("mix-blend-mode", null).style('opacity', 0.05)//.style('stroke', colornone)
+        g.selectAll('path').style("mix-blend-mode", null).style('opacity', 0.01)//.style('stroke', colornone)
+        d3.select(d.text).style('font-weight', 'bold')
         
-        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', '#aec6cf').raise().style('opacity', 1).style('stroke-width', 3)
+
+        d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', sizeColor).raise().style('opacity', 1)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', '#966FD6').raise().style('opacity', 1)//.style("mix-blend-mode", 'multiply')
 
-        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#aec6cf')
-        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#aec6cf')
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style('fill', sizeColor)
+        d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style('fill', sizeColor)
         d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style('fill', '#966FD6')
         d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style('fill', '#966FD6')
 
-        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", '#aec6cf').style('opacity', 1) : null,
+        sizeState == 'on' ? d3.selectAll(d.size_outgoing.map(([, d]) => d.text)).attr("fill", sizeColor).style('opacity', 1) : null,
         locState == 'on' ? d3.selectAll(d.loc_outgoing.map(([, d]) => d.text)).attr("fill", '#966FD6').style('opacity', 1) : null
 
         var nodeId = d3.select(this).attr('id')
@@ -266,7 +268,7 @@ d3.json(link).then(function(data) {
 
     function outed(d) {
         g.selectAll('path').style("mix-blend-mode", "multiply").style('opacity', 0.1)
-        d3.select(this).attr("font-weight", null);
+        d3.select(d.text).style('font-weight', null)
 
         d3.selectAll(d.size_outgoing.map(d => d.size_path)).style('stroke', null).style('stroke-width', null)
         d3.selectAll(d.loc_outgoing.map(d => d.loc_path)).style('stroke', null)
