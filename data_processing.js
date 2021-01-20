@@ -5,6 +5,8 @@ d3.csv("./bft_data21.csv").then(function (data) {
     groupid: "group" + i,
   }));
 
+  console.log(groups);
+
   //var size = ['large', 'small']
   var nodes = data.map((x, i) => ({
     group: groups.filter((y) => y.group == x.Grouping)[0].groupid,
@@ -167,14 +169,14 @@ d3.csv("./bft_data21.csv").then(function (data) {
 
   fullData = JSON.stringify(fullData);
 
-  function download(content, fileName, contentType) {
-    var a = document.createElement("a");
-    var file = new Blob([content], {
-      type: contentType,
-    });
-    a.href = URL.createObjectURL(file);
-    a.download = fileName;
-    a.click();
-  }
-  download(fullData, "nested.json", "text/plain");
+  // function download(content, fileName, contentType) {
+  //   var a = document.createElement("a");
+  //   var file = new Blob([content], {
+  //     type: contentType,
+  //   });
+  //   a.href = URL.createObjectURL(file);
+  //   a.download = fileName;
+  //   a.click();
+  // }
+  // download(fullData, "nested.json", "text/plain");
 });

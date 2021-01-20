@@ -22,9 +22,42 @@
             <div id='db_name' class='db_text'></div>
         </div>
         <div id='db_stats'>
+            <div id='db_y1gp'>
+                <div class="db_link_title">Year 1 Grant Pool</div> 
+                <div class='db_y1gp_toggle'>
+                    <label class="switch">
+                        <input type="checkbox" id='y1gpSlider'>
+                        <span class="slider round" ></span>
+                    </label>
+                </div>
+            </div>
+            <div id='db_y1gpText' class='db_stat'></div>
+
+            <div id='db_y2gp'>
+                <div class="db_link_title">Year 2 Grant Pool</div> 
+                <div class='db_y2gp_toggle'>
+                    <label class="switch">
+                        <input type="checkbox" id='y2gpSlider'>
+                        <span class="slider round" ></span>
+                    </label>
+                </div>
+            </div>
+            <div id='db_y2gpText' class='db_stat'></div>
+
+            <div id='db_erf'>
+                <div class="db_link_title">Emergency Response Fund</div> 
+                <div class='db_erf_toggle'>
+                    <label class="switch">
+                        <input type="checkbox" id='erfSlider'>
+                        <span class="slider round" ></span>
+                    </label>
+                </div>
+            </div>
+            <div id='db_erfText' class='db_stat'></div>
+
             <div id='db_location'>
                 <div id='db_locationheader'>
-                    <div>Location</div>
+                    <div class="db_link_title">Location</div>
                     <div class='db_location_toggle'>
                         <label class="switch">
                             <input type="checkbox" id='locSlider'>
@@ -32,12 +65,11 @@
                         </label>
                     </div>
                 </div>   
-                <div id='db_locationText' class='db_stat'>
-                </div> 
             </div>
+            <div id='db_locationText' class='db_stat'></div> 
             
             <div id='db_size'>
-                <div>Size: </div> 
+                <div class="db_link_title">Size: </div> 
                 <div class='db_size_toggle'>
                     <label class="switch">
                         <input type="checkbox" id='sizeSlider'>
@@ -48,7 +80,7 @@
             <div id='db_sizetext' class='db_stat'></div>
         </div>
         <div id='legend'></div>
-        <div id='credits'>Visualisation by <a id='credits_link' href="http://rowlandwilliams.me" rel="noopener noreferrer" target="_blank" >Rowland Williams</a></div>
+        <!-- <div id='credits'>Visualisation by <a id='credits_link' href="http://rowlandwilliams.me" rel="noopener noreferrer" target="_blank" >Rowland Williams</a></div> -->
     </div>
         
     <div id='network'></div>
@@ -59,6 +91,6 @@
 <script src="https://d3js.org/d3.v5.min.js"></script>
 
 <script src='index.js'></script>
-<!-- <script src='data_processing.js'></script> -->
+<script src='data_processing.js'></script>
 
 </html>

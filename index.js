@@ -16,6 +16,7 @@ var link = "./nested_new.json";
 
 d3.json(link).then(function (data) {
   var nodes = data.nodes;
+  console.log(nodes);
   var nest = data.nest;
 
   // set group colours
@@ -42,21 +43,28 @@ d3.json(link).then(function (data) {
     "group8",
   ];
   var groupNames = [
+    "Education",
     "Farmer's Network",
     "NGO Policy / Campaign group",
-    "Research Organisation",
+    "Farmer's Network & Education",
     "Community Food Project",
+    "University / Research Centre",
     "Ethical Business",
-    "Education",
     "Conservation Charity",
     "Tech",
   ];
   var sizeColor = "#fca474";
+  var y1gpColor = "#fdfd96";
 
   // plot dimenstions
   var width = document.getElementById("network").offsetWidth;
-  var height = document.getElementById("network").offsetHeight - 30;
-  var radius = Math.min(width, height) * 0.71;
+  var height = document.getElementById("network").offsetHeight;
+  var radius = Math.min(width, height) * 0.6;
+  if (radius > 450) {
+    radius = 450;
+  }
+
+  console.log(radius);
 
   // cluster data
   colornone = "#ccc";
@@ -106,9 +114,9 @@ d3.json(link).then(function (data) {
     .attr("class", "svg");
 
   // add change var for each quadrant for label adjustment
-  var change1 = 25;
+  var change1 = 80;
   var change2 = 0;
-  var change3 = 25;
+  var change3 = 80;
   var change4 = 0;
 
   let g = svg
@@ -143,15 +151,15 @@ d3.json(link).then(function (data) {
       d.size_path = this;
     });
 
-  g.selectAll("erf_path") // append location links
+  g.selectAll("erfpath") // append location links
     .data(root.leaves().flatMap((leaf) => leaf.erf_outgoing))
     .enter()
     .append("path")
     .style("mix-blend-mode", "multiply")
     .style("opacity", 0.1)
-    .style("stroke", "grey") //'#966FD6')
+    .style("stroke", "#03c03c") //'#966FD6')
     .attr("d", ([i, o]) => line(i.path(o)))
-    .attr("class", "y2gppath")
+    .attr("class", "erfpath")
     .each(function (d) {
       d.erf_path = this;
     });
@@ -162,7 +170,7 @@ d3.json(link).then(function (data) {
     .append("path")
     .style("mix-blend-mode", "multiply")
     .style("opacity", 0.1)
-    .style("stroke", "yellow") //'#966FD6')
+    .style("stroke", "pink") //'#966FD6')
     .attr("d", ([i, o]) => line(i.path(o)))
     .attr("class", "y2gppath")
     .each(function (d) {
@@ -175,7 +183,7 @@ d3.json(link).then(function (data) {
     .append("path")
     .style("mix-blend-mode", "multiply")
     .style("opacity", 0.1)
-    .style("stroke", "blue") //'#966FD6')
+    .style("stroke", y1gpColor) //'#966FD6')
     .attr("d", ([i, o]) => line(i.path(o)))
     .attr("class", "y1gppath")
     .each(function (d) {
@@ -207,7 +215,7 @@ d3.json(link).then(function (data) {
       var labOffset = 5;
 
       if (d.x < 0.5 * Math.PI) {
-        if (d.x < 0.12 * Math.PI) {
+        if (d.x < 0.25 * Math.PI) {
           nLength = nLength + change1;
           change1 = change1 - 8;
         }
@@ -216,16 +224,16 @@ d3.json(link).then(function (data) {
         d.transX = nLength * Math.cos((d.angle * Math.PI) / 180) + labOffset;
         d.transY = -nLength * Math.sin((d.angle * Math.PI) / 180) - labOffset;
       } else if (d.x >= 0.5 * Math.PI && d.x < Math.PI) {
-        if (d.x > 0.85 * Math.PI) {
+        if (d.x > 0.75 * Math.PI) {
           nLength = nLength + change2;
-          change2 = change2 + 8;
+          change2 = change2 + 6;
         }
         d.nLength = nLength;
         d.angle = (d.x * 180) / Math.PI - 90;
         d.transX = nLength * Math.cos((d.angle * Math.PI) / 180) + labOffset;
         d.transY = nLength * Math.sin((d.angle * Math.PI) / 180) + labOffset;
       } else if (d.x >= Math.PI && d.x < Math.PI * 1.5) {
-        if (d.x < 1.1 * Math.PI) {
+        if (d.x < 1.3 * Math.PI) {
           nLength = nLength + change3;
           change3 = change3 - 8;
         }
@@ -341,73 +349,90 @@ d3.json(link).then(function (data) {
     });
 
   function overed(d) {
+    var nodeId = d3.select(this).attr("id");
+
     g.selectAll("path").style("mix-blend-mode", null).style("opacity", 0.01); //.style('stroke', colornone)
     d3.select(d.text).style("font-weight", "bold");
 
-    d3.selectAll(d.size_outgoing.map((d) => d.size_path))
-      .style("stroke", sizeColor)
-      .raise()
-      .style("opacity", 1);
+    if (sizeState == "on") {
+      d3.selectAll(d.size_outgoing.map((d) => d.size_path))
+        .style("stroke", sizeColor)
+        .raise()
+        .style("opacity", 1);
 
-    d3.selectAll(d.loc_outgoing.map((d) => d.loc_path))
-      .style("stroke", "#966FD6")
-      .raise()
-      .style("opacity", 1); //.style("mix-blend-mode", 'multiply')
+      d3.select("#db_sizetext").text(
+        nodes.filter((x) => x.xid == nodeId)[0].size
+      );
 
-    d3.selectAll(d.erf_outgoing.map((d) => d.y2gp_path))
-      .style("stroke", "grey")
-      .raise()
-      .style("opacity", 1);
+      d3.selectAll(d.size_outgoing.map(([, d]) => d.text))
+        .attr("fill", sizeColor)
+        .style("opacity", 1);
+    }
 
-    d3.selectAll(d.y2gp_outgoing.map((d) => d.y2gp_path))
-      .style("stroke", "pink")
-      .raise()
-      .style("opacity", 1);
+    if (locState == "on") {
+      d3.selectAll(d.loc_outgoing.map((d) => d.loc_path))
+        .style("stroke", "#966FD6")
+        .raise()
+        .style("opacity", 1);
 
-    d3.selectAll(d.y1gp_outgoing.map((d) => d.y1gp_path))
-      .style("stroke", "blue")
-      .raise()
-      .style("opacity", 1);
+      d3.select("#db_locationText").text(
+        nodes.filter((x) => x.xid == nodeId)[0].loc
+      );
 
-    // d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style(
-    //   "fill",
-    //   sizeColor
-    // );
-    // d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style(
-    //   "fill",
-    //   sizeColor
-    // );
-    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style(
-    //   "fill",
-    //   "#966FD6"
-    // );
-    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style(
-    //   "fill",
-    //   "#966FD6"
-    // );
+      d3.selectAll(d.loc_outgoing.map(([, d]) => d.text))
+        .attr("fill", "#966FD6")
+        .style("opacity", 1);
+    }
 
-    // sizeState == "on"
-    //   ? d3
-    //       .selectAll(d.size_outgoing.map(([, d]) => d.text))
-    //       .attr("fill", sizeColor)
-    //       .style("opacity", 1)
-    //   : null,
-    //   locState == "on"
-    //     ? d3
-    //         .selectAll(d.loc_outgoing.map(([, d]) => d.text))
-    //         .attr("fill", "#966FD6")
-    //         .style("opacity", 1)
-    //     : null;
+    if (erfState == "on") {
+      d3.selectAll(d.erf_outgoing.map((d) => d.erf_path))
+        .style("stroke", "#03c03c")
+        .raise()
+        .style("opacity", 1);
 
-    var nodeId = d3.select(this).attr("id");
+      d3.select("#db_erfText").text(
+        nodes.filter((x) => x.xid == nodeId)[0].ERF == "FALSE"
+          ? "No funding received"
+          : "Funding received"
+      );
+      d3.selectAll(d.erf_outgoing.map(([, d]) => d.text))
+        .attr("fill", "#03c03c")
+        .style("opacity", 1);
+    }
+
+    if (y2gpState == "on") {
+      d3.selectAll(d.y2gp_outgoing.map((d) => d.y2gp_path))
+        .style("stroke", "pink")
+        .raise()
+        .style("opacity", 1);
+
+      d3.select("#db_y2gpText").text(
+        nodes.filter((x) => x.xid == nodeId)[0].Y2GP == "FALSE"
+          ? "No funding received"
+          : "Funding received"
+      );
+      d3.selectAll(d.y2gp_outgoing.map(([, d]) => d.text))
+        .attr("fill", "pink")
+        .style("opacity", 1);
+    }
+
+    if (y1gpState == "on") {
+      d3.selectAll(d.y1gp_outgoing.map((d) => d.y1gp_path))
+        .style("stroke", y1gpColor)
+        .raise()
+        .style("opacity", 1);
+
+      d3.select("#db_y1gpText").text(
+        nodes.filter((x) => x.xid == nodeId)[0].Y1GP == "FALSE"
+          ? "No funding received"
+          : "Funding received"
+      );
+      d3.selectAll(d.y1gp_outgoing.map(([, d]) => d.text))
+        .attr("fill", "#fdfd96")
+        .style("opacity", 1);
+    }
 
     d3.select("#db_name").text(nodes.filter((x) => x.xid == nodeId)[0].name);
-    d3.select("#db_sizetext").text(
-      nodes.filter((x) => x.xid == nodeId)[0].size
-    );
-    d3.select("#db_locationText").text(
-      nodes.filter((x) => x.xid == nodeId)[0].loc
-    );
   }
 
   function outed(d) {
@@ -416,39 +441,56 @@ d3.json(link).then(function (data) {
       .style("opacity", 0.1);
     d3.select(d.text).style("font-weight", null);
 
-    d3.selectAll(d.size_outgoing.map((d) => d.size_path))
-      .style("stroke", null)
-      .style("stroke-width", null);
+    if (sizeState == "on") {
+      d3.selectAll(d.size_outgoing.map((d) => d.size_path))
+        .style("stroke", null)
+        .style("stroke-width", null);
+      d3.selectAll(d.size_outgoing.map(([, d]) => d.text))
+        .attr("fill", null)
+        .style("opacity", 1);
+      d3.select("#db_sizetext").text("");
+    }
 
-    d3.selectAll(d.loc_outgoing.map((d) => d.loc_path)).style("stroke", null);
+    if (locState == "on") {
+      d3.selectAll(d.loc_outgoing.map((d) => d.loc_path)).style("stroke", null);
+      d3.selectAll(d.loc_outgoing.map(([, d]) => d.text))
+        .attr("fill", null)
+        .style("opacity", 1);
+      d3.select("#db_locationText").text("");
+    }
 
-    // d3.selectAll(d.size_outgoing.map(([, d]) => d.text))
-    //   .attr("fill", null)
-    //   .style("opacity", 1);
-    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.text))
-    //   .attr("fill", null)
-    //   .style("opacity", 1);
+    if (y2gpState == "on") {
+      d3.selectAll(d.y2gp_outgoing.map((d) => d.y2gp_path)).style(
+        "stroke",
+        null
+      );
+      d3.selectAll(d.y2gp_outgoing.map(([, d]) => d.text))
+        .attr("fill", null)
+        .style("opacity", 1);
+      d3.select("#db_y2gpText").text("");
+    }
 
-    // d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style(
-    //   "fill",
-    //   "grey"
-    // );
-    // d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style(
-    //   "fill",
-    //   "grey"
-    // );
-    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style(
-    //   "fill",
-    //   "grey"
-    // );
-    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style(
-    //   "fill",
-    //   "grey"
-    // );
-
+    if (erfState == "on") {
+      d3.selectAll(d.erf_outgoing.map((d) => d.erf_path)).style("stroke", null);
+      d3.selectAll(d.erf_outgoing.map(([, d]) => d.text))
+        .attr("fill", null)
+        .style("opacity", 1);
+      d3.select("#db_erfText").text("");
+      d3.selectAll(d.erf_outgoing.map(([, d]) => d.text))
+        .attr("fill", "null")
+        .style("opacity", 1);
+    }
+    if (y1gpState == "on") {
+      d3.selectAll(d.y1gp_outgoing.map((d) => d.y1gp_path)).style(
+        "stroke",
+        null
+      );
+      d3.selectAll(d.y1gp_outgoing.map(([, d]) => d.text))
+        .attr("fill", null)
+        .style("opacity", 1);
+      d3.select("#db_y1gpText").text("");
+    }
     d3.select("#db_name").text("");
-    d3.select("#db_sizetext").text("");
-    d3.select("#db_locationText").text("");
   }
 
   // LEGEND
@@ -499,6 +541,42 @@ d3.json(link).then(function (data) {
     d3.selectAll("g.group").style("opacity", 1);
   }
 
+  var y1gpState = "on";
+  d3.select(".db_y1gp_toggle") // update location links
+    .on("change", updateY1GP);
+
+  function updateY1GP() {
+    y1gpState == "on"
+      ? (g.selectAll(".y1gppath").style("visibility", "hidden"),
+        (y1gpState = "off"))
+      : (g.selectAll(".y1gppath").style("visibility", "visible"),
+        (y1gpState = "on"));
+  }
+
+  var y2gpState = "on";
+  d3.select(".db_y2gp_toggle") // update location links
+    .on("change", updateY2GP);
+
+  function updateY2GP() {
+    y2gpState == "on"
+      ? (g.selectAll(".y2gppath").style("visibility", "hidden"),
+        (y2gpState = "off"))
+      : (g.selectAll(".y2gppath").style("visibility", "visible"),
+        (y2gpState = "on"));
+  }
+
+  var erfState = "on";
+  d3.select(".db_erf_toggle") // update location links
+    .on("change", updateERF);
+
+  function updateERF() {
+    erfState == "on"
+      ? (g.selectAll(".erfpath").style("visibility", "hidden"),
+        (erfState = "off"))
+      : (g.selectAll(".erfpath").style("visibility", "visible"),
+        (erfState = "on"));
+  }
+
   d3.select(".db_location_toggle") // update location links
     .on("change", updateLocation);
 
@@ -523,9 +601,9 @@ d3.json(link).then(function (data) {
         (sizeState = "on"));
   }
 
-  window.addEventListener("resize", setDash);
-  setDash();
+  //   window.addEventListener("resize", setDash);
+  //   setDash();
 });
 
-window.addEventListener("resize", setDash);
-setDash();
+// window.addEventListener("resize", setDash);
+// setDash();
