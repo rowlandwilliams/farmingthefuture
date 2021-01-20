@@ -1,6 +1,4 @@
 d3.csv("./bft_data21.csv").then(function (data) {
-  console.log(data);
-
   // define organization types for segmentation of nodes around circle
   var groups = [...new Set(data.map((x) => x.Grouping))].map((y, i) => ({
     group: y,
@@ -14,11 +12,12 @@ d3.csv("./bft_data21.csv").then(function (data) {
     id: i,
     xid: "x" + i,
     Y1GP: x.Y1GP,
+    Y2GP: x.Y2GP,
+    ERF: x.ERF,
     loc: x.Location2,
     size: x.Scale,
   }));
 
-  console.log(nodes);
   function getLinks(category) {
     var matrix = [];
     var copy = [...nodes];
@@ -53,7 +52,6 @@ d3.csv("./bft_data21.csv").then(function (data) {
       }
     }
 
-    // var links = Object.values(links.reduce((acc,cur)=>Object.assign(acc,{[cur.link_id]:cur}),{}))
     return links;
   }
 
@@ -93,17 +91,18 @@ d3.csv("./bft_data21.csv").then(function (data) {
         }
       }
     }
-
-    // var links = Object.values(links.reduce((acc,cur)=>Object.assign(acc,{[cur.link_id]:cur}),{}))
     return links;
   }
   var y1gpLinks = getFundingLinks("Y1GP");
+  var erfLinks = getFundingLinks("ERF");
+  var y2gpLinks = getFundingLinks("Y2GP");
+  console.log("test: ", y2gpLinks);
+
   var locationLinks = getLinks("loc");
   var sizeLinks = getLinks("size");
 
-  console.log(y1gpLinks);
-
-  var links = y1gpLinks.concat(locationLinks); //.concat(sizeLinks);
+  var links = y1gpLinks.concat(y2gpLinks, locationLinks); //.concat(sizeLinks);
+  console.log(links);
 
   // // nested array
   var nest = { name: "ftf", children: [] };
@@ -132,6 +131,20 @@ d3.csv("./bft_data21.csv").then(function (data) {
             (id) =>
               "ftf." + nodes.filter((y) => y.xid == id)[0].group + "." + id
           ),
+        y2gp_imports: y2gpLinks
+          .filter((x) => x.source == z.xid)
+          .map((y) => y.target)
+          .map(
+            (id) =>
+              "ftf." + nodes.filter((y) => y.xid == id)[0].group + "." + id
+          ),
+        erf_imports: erfLinks
+          .filter((x) => x.source == z.xid)
+          .map((y) => y.target)
+          .map(
+            (id) =>
+              "ftf." + nodes.filter((y) => y.xid == id)[0].group + "." + id
+          ),
         location_imports: locationLinks
           .filter((x) => x.source == z.xid)
           .map((y) => y.target)
@@ -148,34 +161,6 @@ d3.csv("./bft_data21.csv").then(function (data) {
           ),
       })),
   }));
-
-  // // var test = nodes.map(x => ({
-  // //     'name': 'ftf.' + x.group + '.' + x.xid,
-  // //     'imports': links.filter(y => y.source == x.xid).map(z => z.target)
-  // //     .map(id => 'ftf.' + nodes.filter(y => y.xid == id)[0].group + '.' + id)
-  // // }))
-
-  // function hierarchy(data, delimiter = ".") {
-  //     let root;
-  //     const map = new Map;
-  //     data.forEach(function find(data) {
-  //       const {name} = data;
-  //       if (map.has(name)) return map.get(name);
-  //       const i = name.lastIndexOf(delimiter);
-  //       map.set(name, data);
-  //       if (i >= 0) {
-  //         find({name: name.substring(0, i), children: []}).children.push(data);
-  //         data.name = name.substring(i + 1);
-  //       } else {
-  //         root = data;
-  //       }
-  //       return data;
-  //     });
-  //     return root;
-  //   }
-
-  // //   var testData = hierarchy(test, '.')
-  // //   console.log(testData)
 
   console.log(nest);
   var fullData = { nodes: nodes, links: links, nest: nest };

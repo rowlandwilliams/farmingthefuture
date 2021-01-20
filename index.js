@@ -11,7 +11,7 @@ document
   .getElementById("network")
   .setAttribute("style", "height:" + window.innerHeight * 0.94 + "px"); // set graph height
 
-var link = "./nested21.json";
+var link = "./nested_new.json";
 //var link = './bft_data.csv'
 
 d3.json(link).then(function (data) {
@@ -27,6 +27,8 @@ d3.json(link).then(function (data) {
     "#a80348",
     "#a52a94",
     "#d21044",
+    "#03c03c",
+    "#779ecb",
   ];
   var groups = [
     "group0",
@@ -36,6 +38,8 @@ d3.json(link).then(function (data) {
     "group4",
     "group5",
     "group6",
+    "group7",
+    "group8",
   ];
   var groupNames = [
     "Farmer's Network",
@@ -44,6 +48,8 @@ d3.json(link).then(function (data) {
     "Community Food Project",
     "Ethical Business",
     "Education",
+    "Conservation Charity",
+    "Tech",
   ];
   var sizeColor = "#fca474";
 
@@ -74,6 +80,8 @@ d3.json(link).then(function (data) {
     for (const d of root.leaves())
       (d.outgoing = d.data.imports.map((i) => [d, map.get(i)])),
         (d.y1gp_outgoing = d.data.y1gp_imports.map((i) => [d, map.get(i)])),
+        (d.y2gp_outgoing = d.data.y2gp_imports.map((i) => [d, map.get(i)])),
+        (d.erf_outgoing = d.data.erf_imports.map((i) => [d, map.get(i)])),
         (d.loc_outgoing = d.data.location_imports.map((i) => [d, map.get(i)])), // create location and size outgoing
         (d.size_outgoing = d.data.size_imports.map((i) => [d, map.get(i)]));
     return root;
@@ -122,6 +130,45 @@ d3.json(link).then(function (data) {
       d.loc_path = this;
     });
 
+  g.selectAll("sizepath") // append size links
+    .data(root.leaves().flatMap((leaf) => leaf.size_outgoing))
+    .enter()
+    .append("path")
+    .style("mix-blend-mode", "multiply")
+    .style("opacity", 0.1)
+    .style("stroke", sizeColor)
+    .attr("d", ([i, o]) => line(i.path(o)))
+    .attr("class", "sizepath")
+    .each(function (d) {
+      d.size_path = this;
+    });
+
+  g.selectAll("erf_path") // append location links
+    .data(root.leaves().flatMap((leaf) => leaf.erf_outgoing))
+    .enter()
+    .append("path")
+    .style("mix-blend-mode", "multiply")
+    .style("opacity", 0.1)
+    .style("stroke", "grey") //'#966FD6')
+    .attr("d", ([i, o]) => line(i.path(o)))
+    .attr("class", "y2gppath")
+    .each(function (d) {
+      d.erf_path = this;
+    });
+
+  g.selectAll("y2gppath") // append location links
+    .data(root.leaves().flatMap((leaf) => leaf.y2gp_outgoing))
+    .enter()
+    .append("path")
+    .style("mix-blend-mode", "multiply")
+    .style("opacity", 0.1)
+    .style("stroke", "yellow") //'#966FD6')
+    .attr("d", ([i, o]) => line(i.path(o)))
+    .attr("class", "y2gppath")
+    .each(function (d) {
+      d.y2gp_path = this;
+    });
+
   g.selectAll("y1gppath") // append location links
     .data(root.leaves().flatMap((leaf) => leaf.y1gp_outgoing))
     .enter()
@@ -134,19 +181,6 @@ d3.json(link).then(function (data) {
     .each(function (d) {
       d.y1gp_path = this;
     });
-
-  //   g.selectAll("sizepath") // append size links
-  //     .data(root.leaves().flatMap((leaf) => leaf.size_outgoing))
-  //     .enter()
-  //     .append("path")
-  //     .style("mix-blend-mode", "multiply")
-  //     .style("opacity", 0.1)
-  //     .style("stroke", sizeColor)
-  //     .attr("d", ([i, o]) => line(i.path(o)))
-  //     .attr("class", "sizepath")
-  //     .each(function (d) {
-  //       d.size_path = this;
-  //     });
 
   const node = svg
     .append("g") // add nodes
@@ -310,18 +344,28 @@ d3.json(link).then(function (data) {
     g.selectAll("path").style("mix-blend-mode", null).style("opacity", 0.01); //.style('stroke', colornone)
     d3.select(d.text).style("font-weight", "bold");
 
-    // d3.selectAll(d.size_outgoing.map((d) => d.size_path))
-    //   .style("stroke", sizeColor)
-    //   .raise()
-    //   .style("opacity", 1);
+    d3.selectAll(d.size_outgoing.map((d) => d.size_path))
+      .style("stroke", sizeColor)
+      .raise()
+      .style("opacity", 1);
 
-    // d3.selectAll(d.loc_outgoing.map((d) => d.loc_path))
-    //   .style("stroke", "#966FD6")
-    //   .raise()
-    //   .style("opacity", 1); //.style("mix-blend-mode", 'multiply')
+    d3.selectAll(d.loc_outgoing.map((d) => d.loc_path))
+      .style("stroke", "#966FD6")
+      .raise()
+      .style("opacity", 1); //.style("mix-blend-mode", 'multiply')
+
+    d3.selectAll(d.erf_outgoing.map((d) => d.y2gp_path))
+      .style("stroke", "grey")
+      .raise()
+      .style("opacity", 1);
+
+    d3.selectAll(d.y2gp_outgoing.map((d) => d.y2gp_path))
+      .style("stroke", "pink")
+      .raise()
+      .style("opacity", 1);
 
     d3.selectAll(d.y1gp_outgoing.map((d) => d.y1gp_path))
-      .style("stroke", sizeColor)
+      .style("stroke", "blue")
       .raise()
       .style("opacity", 1);
 
@@ -375,31 +419,32 @@ d3.json(link).then(function (data) {
     d3.selectAll(d.size_outgoing.map((d) => d.size_path))
       .style("stroke", null)
       .style("stroke-width", null);
+
     d3.selectAll(d.loc_outgoing.map((d) => d.loc_path)).style("stroke", null);
 
-    d3.selectAll(d.size_outgoing.map(([, d]) => d.text))
-      .attr("fill", null)
-      .style("opacity", 1);
-    d3.selectAll(d.loc_outgoing.map(([, d]) => d.text))
-      .attr("fill", null)
-      .style("opacity", 1);
+    // d3.selectAll(d.size_outgoing.map(([, d]) => d.text))
+    //   .attr("fill", null)
+    //   .style("opacity", 1);
+    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.text))
+    //   .attr("fill", null)
+    //   .style("opacity", 1);
 
-    d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style(
-      "fill",
-      "grey"
-    );
-    d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style(
-      "fill",
-      "grey"
-    );
-    d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style(
-      "fill",
-      "grey"
-    );
-    d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style(
-      "fill",
-      "grey"
-    );
+    // d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine1)).style(
+    //   "fill",
+    //   "grey"
+    // );
+    // d3.selectAll(d.size_outgoing.map(([, d]) => d.nodeLine2)).style(
+    //   "fill",
+    //   "grey"
+    // );
+    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine1)).style(
+    //   "fill",
+    //   "grey"
+    // );
+    // d3.selectAll(d.loc_outgoing.map(([, d]) => d.nodeLine2)).style(
+    //   "fill",
+    //   "grey"
+    // );
 
     d3.select("#db_name").text("");
     d3.select("#db_sizetext").text("");
