@@ -164,19 +164,18 @@ d3.csv("./bft_data21.csv").then(function (data) {
       })),
   }));
 
-  console.log(nest);
   var fullData = { nodes: nodes, links: links, nest: nest };
 
   fullData = JSON.stringify(fullData);
 
-  // function download(content, fileName, contentType) {
-  //   var a = document.createElement("a");
-  //   var file = new Blob([content], {
-  //     type: contentType,
-  //   });
-  //   a.href = URL.createObjectURL(file);
-  //   a.download = fileName;
-  //   a.click();
-  // }
-  // download(fullData, "nested.json", "text/plain");
+  function download(content, fileName, contentType) {
+    var a = document.createElement("a");
+    var file = new Blob([content], {
+      type: contentType,
+    });
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+  }
+  download(fullData, "nested.json", "text/plain");
 });

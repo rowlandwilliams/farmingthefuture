@@ -54,7 +54,7 @@ d3.json(link).then(function (data) {
     "Tech",
   ];
   var sizeColor = "#fca474";
-  var y1gpColor = "#fdfd96";
+  var y1gpColor = "#d6af20"; // "#fdfd96";
 
   // plot dimenstions
   var width = document.getElementById("network").offsetWidth;
@@ -236,6 +236,10 @@ d3.json(link).then(function (data) {
         if (d.x < 1.3 * Math.PI) {
           nLength = nLength + change3;
           change3 = change3 - 8;
+        }
+        if (d.x > 1.2 * Math.PI && d.x < 1.4 * Math.PI) {
+          nLength = nLength + change3;
+          change3 = change3 + 8;
         }
         d.nLength = nLength;
         d.angle = 180 - ((d.x * 180) / Math.PI - 90);
@@ -428,7 +432,7 @@ d3.json(link).then(function (data) {
           : "Funding received"
       );
       d3.selectAll(d.y1gp_outgoing.map(([, d]) => d.text))
-        .attr("fill", "#fdfd96")
+        .attr("fill", y1gpColor)
         .style("opacity", 1);
     }
 
