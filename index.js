@@ -29,7 +29,6 @@ d3.json(link).then(function (data) {
     "#a52a94",
     "#d21044",
     "#03c03c",
-    "#779ecb",
   ];
   var groups = [
     "group0",
@@ -40,13 +39,11 @@ d3.json(link).then(function (data) {
     "group5",
     "group6",
     "group7",
-    "group8",
   ];
   var groupNames = [
     "Education",
     "Farmer's Network",
     "NGO Policy / Campaign group",
-    "Farmer's Network & Education",
     "Community Food Project",
     "University / Research Centre",
     "Ethical Business",
